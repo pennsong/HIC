@@ -1,12 +1,28 @@
 <ion-view view-title="嗨羞邀请">
-    <ion-content>
+    <ion-content padding="true">
+        <div class="card">
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('地点')">
+                <i class="icon ion-ios-person"></i>
+                地点
+                <span class="item-note">
+                  {{meet.loc.locName}}
+                </span>
+            </a>
+        </div>
         <div class="list card">
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('性别')">
+                <i class="icon ion-ios-person"></i>
+                性别
+                <span class="item-note">
+                  {{meet.sex}}
+                </span>
+            </a>
 
             <a href="#" class="item item-icon-left" ng-click="clickInfoItem('发型')">
                 <i class="icon ion-ios-person"></i>
                 发型
                 <span class="item-note">
-                  {{myInfo.hair}}
+                  {{meet.hair}}
                 </span>
             </a>
 
@@ -14,7 +30,7 @@
                 <i class="icon ion-ios-glasses"></i>
                 眼镜
                 <span class="item-note">
-                  {{myInfo.glasses}}
+                  {{meet.glasses}}
                 </span>
             </a>
 
@@ -22,7 +38,7 @@
                 <i class="icon ion-tshirt"></i>
                 衣服类型
                 <span class="item-note">
-                  {{myInfo.clothesType}}
+                  {{meet.clothesType}}
                 </span>
             </a>
 
@@ -30,7 +46,7 @@
                 <i class="icon ion-android-color-palette"></i>
                 衣服颜色
                 <span class="item-note">
-                  {{myInfo.clothesColor}}
+                  {{meet.clothesColor}}
                 </span>
             </a>
 
@@ -38,22 +54,24 @@
                 <i class="icon ion-ios-medical"></i>
                 衣服花纹
                 <span class="item-note">
-                  {{myInfo.clothesStyle}}
+                  {{meet.clothesStyle}}
                 </span>
             </a>
         </div>
-        <div class="card">
-            <div class="item item-text-wrap">
-                拍摄特征图片帮助...
-            </div>
-            <div class="text-center" style="padding-top:10px">
-                <img ng-show="imgURI !== undefined" ng-src="{{imgURI}}">
-                <img ng-show="imgURI == undefined" ng-src="img/200x200.gif">
-            </div>
-            <div class="padding">
-                <button class="button button-block button-positive" ng-click="takePhoto()">
-                    拍摄
-                </button>
+        <button class="button button-block button-balanced icon ion-search">
+        </button>
+        <div style="text-align:center" ng-repeat="item in specialPics">
+            <div class="row" ng-if="$even">
+                <div class="col">
+                    <a href="#">
+                        <img style="width: 120px" ng-src="{{specialPics[$index].fileName}}">
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="#">
+                        <img style="width: 120px"  ng-src="{{specialPics[$index + 1].fileName}}">
+                    </a>
+                </div>
             </div>
         </div>
     </ion-content>

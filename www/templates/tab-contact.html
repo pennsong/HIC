@@ -1,7 +1,7 @@
 <ion-view view-title="联系人">
     <ion-content>
         <div class="list">
-            <a class="item item-avatar-left" ui-sref="tab.contact-chat({meetId: meet._id})" ng-repeat="meet in contacts">
+            <a class="item item-avatar-left" ui-sref="tab.contact.chat({meetId: meet._id})" ng-repeat="meet in contacts">
                 <img ng-src="{{meet.createrPic}}">
                 <h2>{{meet.displayName}}</h2>
                 <p>{{meet.latestWord}} -发生于:{{meet.latestWordTime}}</p>

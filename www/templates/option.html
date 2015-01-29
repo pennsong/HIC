@@ -8,7 +8,7 @@
             <label class="item item-radio" ng-repeat="item in curOptions" ng-click="clickItem(item)">
                 <input type="radio" name="group">
                 <div class="item-content">
-                    {{item}}
+                    {{item.locName || item}}
                 </div>
             </label>
         </div>

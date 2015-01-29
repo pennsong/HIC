@@ -1,5 +1,50 @@
 // Ionic Starter App
+sexArray = [
+    "男",
+    "女"
+];
 
+hairArray = [
+    "竖起",
+    "躺下",
+    "辫子/盘发",
+    "短发(齐肩,不过肩)",
+    "长发(过肩)",
+    "戴帽子"
+];
+
+glassesArray = [
+    "带",
+    "不带"
+];
+
+clothesTypeArray = [
+    "风衣/大衣",
+    "西装/夹克/套装",
+    "运动外套/卫衣",
+    "T恤长袖",
+    "T恤短袖",
+    "马甲/背心",
+    "长袖衬衫",
+    "短袖衬衫",
+    "毛衣/羊毛绒/线衫/针织"
+];
+
+clothesColorArray = [
+    "红/紫/粉",
+    "黄",
+    "蓝/绿",
+    "白",
+    "黑",
+    "灰",
+    "无法分辨主要颜色"
+];
+
+clothesStyleArray = [
+    "纯色",
+    "线条/格子/色块",
+    "图案(抽象,卡通,画等)"
+];
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
@@ -75,21 +120,21 @@ app.config(function($stateProvider, $urlRouterProvider){
                 }
             }
         })
-        .state('tab.contact-chat', {
+        .state('tab.contact.chat', {
             url: '/chat/{meetId}',
             views: {
-                'contact': {
+                'contact@tab': {
                     templateUrl: 'templates/contact-chat.html',
                     controller: 'chatCtrl'
                 }
             }
         })
         .state('tab.meet.create', {
-            url: '/chat/{meetId}',
+            url: '/create',
             views: {
-                'contact': {
-                    templateUrl: 'templates/contact-chat.html',
-                    controller: 'chatCtrl'
+                'meet@tab': {
+                    templateUrl: 'templates/meet-create.html',
+                    controller: 'meetCreateCtrl'
                 }
             }
         });
@@ -149,6 +194,170 @@ app.controller('loginCtrl', function($scope, $state) {
 app.controller('registerCtrl', function($scope, $state) {
     $scope.goLogin = function(){
         $state.go("login");
+    }
+});
+
+app.controller('meetCreateCtrl', function($scope, $state, $ionicModal) {
+    $scope.meet = {
+        loc: null,
+        sex: '',
+        hair: '',
+        glasses: '',
+        clothesType: '',
+        clothesColor: '',
+        clothesStyle: '',
+        fileName: ''
+    }
+
+    $scope.specialPics = [
+        {
+            userName: 'a',
+            fileName: 'http://ionicframework.com/img/docs/siamese-dream.jpg'
+        },
+        {
+            userName: 'b',
+            fileName: 'http://ionicframework.com/img/docs/nevermind.jpg'
+        },
+        {
+            userName: 'c',
+            fileName: 'http://ionicframework.com/img/docs/siamese-dream.jpg'
+        },
+        {
+            userName: 'd',
+            fileName: 'http://ionicframework.com/img/docs/siamese-dream.jpg'
+        },
+        {
+            userName: 'e',
+            fileName: 'http://ionicframework.com/img/docs/siamese-dream.jpg'
+        },
+        {
+            userName: 'f',
+            fileName: 'http://ionicframework.com/img/docs/blue-album.jpg'
+        },
+        {
+            userName: 'g',
+            fileName: 'http://ionicframework.com/img/docs/siamese-dream.jpg'
+        }
+    ];
+
+    $scope.loc = [
+        {
+            locId: "1",
+            locName: "地点1"
+        },
+        {
+            locId: "2",
+            locName: "地点2"
+        },
+        {
+            locId: "3",
+            locName: "地点3"
+        },
+        {
+            locId: "4",
+            locName: "地点4"
+        },
+        {
+            locId: "5",
+            locName: "地点5"
+        },
+        {
+            locId: "6",
+            locName: "地点6"
+        },
+        {
+            locId: "7",
+            locName: "地点7"
+        },
+        {
+            locId: "8",
+            locName: "地点8"
+        },
+        {
+            locId: "9",
+            locName: "地点9"
+        }
+    ];
+
+    $scope.sex = sexArray;
+    $scope.hair = hairArray;
+    $scope.glasses = glassesArray;
+    $scope.clothesType = clothesTypeArray;
+    $scope.clothesColor = clothesColorArray;
+    $scope.clothesStyle = clothesStyleArray;
+
+    $scope.curOptions = [];
+    $scope.curOptionName = "";
+
+    $ionicModal.fromTemplateUrl(
+        'templates/option.html',
+        function($ionicModal) {
+            $scope.modal = $ionicModal;
+        },
+        {
+            // Use our scope for the scope of the modal to keep it simple
+            scope: $scope,
+            // The animation we want to use for the modal entrance
+            animation: 'slide-in-up'
+        }
+    );
+
+    $scope.clickInfoItem = function(item){
+        switch(item) {
+            case "地点":
+                $scope.curOptions = $scope.loc;
+                break;
+            case "性别":
+                $scope.curOptions = $scope.sex;
+                break;
+            case "发型":
+                $scope.curOptions = $scope.hair;
+                break;
+            case "眼镜":
+                $scope.curOptions = $scope.glasses;
+                break;
+            case "衣服类型":
+                $scope.curOptions = $scope.clothesType;
+                break;
+            case "衣服颜色":
+                $scope.curOptions = $scope.clothesColor;
+                break;
+            case "衣服花纹":
+                $scope.curOptions = $scope.clothesStyle;
+                break;
+            default:
+        }
+        $scope.curOptionName = item;
+        $scope.modal.show();
+    }
+
+    $scope.clickItem = function(item){
+        switch($scope.curOptionName) {
+            case "地点":
+                $scope.meet.loc = item;
+                break;
+            case "性别":
+                $scope.meet.sex = item;
+                break;
+            case "发型":
+                $scope.meet.hair = item;
+                break;
+            case "眼镜":
+                $scope.meet.glasses = item;
+                break;
+            case "衣服类型":
+                $scope.meet.clothesType = item;
+                break;
+            case "衣服颜色":
+                $scope.meet.clothesColor = item;
+                break;
+            case "衣服花纹":
+                $scope.meet.clothesStyle = item;
+                break;
+            default:
+
+        }
+        $scope.modal.hide();
     }
 });
 
@@ -330,53 +539,14 @@ app.controller('infoCtrl', function($scope, $state, $ionicModal, $cordovaCamera)
         fileName: ''
     }
 
-    $scope.hair = [
-        "竖起",
-        "躺下",
-        "辫子/盘发",
-        "短发(齐肩,不过肩)",
-        "长发(过肩)",
-        "戴帽子"
-    ];
-
-    $scope.glasses = [
-        "带",
-        "不带"
-    ];
-
-    $scope.clothesType = [
-        "风衣/大衣",
-        "西装/夹克/套装",
-        "运动外套/卫衣",
-        "T恤长袖",
-        "T恤短袖",
-        "马甲/背心",
-        "长袖衬衫",
-        "短袖衬衫",
-        "毛衣/羊毛绒/线衫/针织"
-    ];
-
-    $scope.clothesColor = [
-        "红/紫/粉",
-        "黄",
-        "蓝/绿",
-        "白",
-        "黑",
-        "灰",
-        "无法分辨主要颜色"
-    ];
-
-    $scope.clothesStyle = [
-        "纯色",
-        "线条/格子/色块",
-        "图案(抽象,卡通,画等)"
-    ];
+    $scope.hair = hairArray;
+    $scope.glasses = glassesArray;
+    $scope.clothesType = clothesTypeArray;
+    $scope.clothesColor = clothesColorArray;
+    $scope.clothesStyle = clothesStyleArray;
 
     $scope.curOptions = [];
     $scope.curOptionName = "";
-
-    $scope.curOptions = $scope.hair;
-    $scope.curOptionName = "发型";
 
     $ionicModal.fromTemplateUrl(
         'templates/option.html',
