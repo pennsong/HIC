@@ -1,8 +1,65 @@
 <ion-view view-title="我的特征">
     <ion-header-bar align-title="center" class="bar-positive">
         <h1 class="title">我的特征</h1>
+
     </ion-header-bar>
-    <ion-content padding="true">
-        我的特征
+    <ion-content>
+
+        <div class="list card">
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('发型')">
+                <i class="icon ion-ios-person"></i>
+                发型
+                <span class="item-note">
+                  {{myInfo.hair}}
+                </span>
+            </a>
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('眼镜')">
+                <i class="icon ion-ios-glasses"></i>
+                眼镜
+                <span class="item-note">
+                  {{myInfo.glasses}}
+                </span>
+            </a>
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('衣服类型')">
+                <i class="icon ion-tshirt"></i>
+                衣服类型
+                <span class="item-note">
+                  {{myInfo.clothesType}}
+                </span>
+            </a>
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('衣服颜色')">
+                <i class="icon ion-android-color-palette"></i>
+                衣服颜色
+                <span class="item-note">
+                  {{myInfo.clothesColor}}
+                </span>
+            </a>
+
+            <a href="#" class="item item-icon-left" ng-click="clickInfoItem('衣服花纹')">
+                <i class="icon ion-ios-medical"></i>
+                衣服花纹
+                <span class="item-note">
+                  {{myInfo.clothesStyle}}
+                </span>
+            </a>
+        </div>
+        <div class="card">
+            <div class="item item-text-wrap">
+                拍摄特征图片帮助...
+            </div>
+            <div class="text-center" style="padding-top:10px">
+                <img ng-show="imgURI !== undefined" ng-src="{{imgURI}}">
+                <img ng-show="imgURI == undefined" ng-src="img/200x200.gif">
+            </div>
+            <div class="padding">
+                <button class="button button-block button-positive" ng-click="takePhoto()">
+                    拍摄
+                </button>
+            </div>
+        </div>
     </ion-content>
 </ion-view>

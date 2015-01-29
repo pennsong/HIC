@@ -1,0 +1,16 @@
+<ion-modal-view>
+    <ion-header-bar>
+        <h1 class="title">{{curOptionName}}</h1>
+        <div class="button button-clear" ng-click="modal.hide()"><span class="icon ion-close"></span></div>
+    </ion-header-bar>
+    <ion-content>
+        <div class="list">
+            <label class="item item-radio" ng-repeat="item in curOptions" ng-click="clickItem(item)">
+                <input type="radio" name="group">
+                <div class="item-content">
+                    {{item}}
+                </div>
+            </label>
+        </div>
+    </ion-content>
+</ion-modal-view>

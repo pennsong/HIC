@@ -3,7 +3,7 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-var app = angular.module('ionicApp', ['ionic'])
+var app = angular.module('ionicApp', ['ionic', 'ngCordova'])
 
     .run(function($ionicPlatform) {
         $ionicPlatform.ready(function() {
@@ -76,7 +76,7 @@ app.config(function($stateProvider, $urlRouterProvider){
             }
         })
         .state('tab.contact-chat', {
-            url: '/chat',
+            url: '/chat/{meetId}',
             views: {
                 'contact': {
                     templateUrl: 'templates/contact-chat.html',
@@ -311,15 +311,162 @@ app.controller('contactCtrl', function($scope, $state) {
 
 });
 
-app.controller('infoCtrl', function($scope, $state) {
+app.controller('infoCtrl', function($scope, $state, $ionicModal, $cordovaCamera) {
+    $scope.myInfo = {
+        hair: '',
+        glasses: '',
+        clothesType: '',
+        clothesColor: '',
+        clothesStyle: '',
+        fileName: ''
+    }
 
+    $scope.hair = [
+        "竖起",
+        "躺下",
+        "辫子/盘发",
+        "短发(齐肩,不过肩)",
+        "长发(过肩)",
+        "戴帽子"
+    ];
+
+    $scope.glasses = [
+        "带",
+        "不带"
+    ];
+
+    $scope.clothesType = [
+        "风衣/大衣",
+        "西装/夹克/套装",
+        "运动外套/卫衣",
+        "T恤长袖",
+        "T恤短袖",
+        "马甲/背心",
+        "长袖衬衫",
+        "短袖衬衫",
+        "毛衣/羊毛绒/线衫/针织"
+    ];
+
+    $scope.clothesColor = [
+        "红/紫/粉",
+        "黄",
+        "蓝/绿",
+        "白",
+        "黑",
+        "灰",
+        "无法分辨主要颜色"
+    ];
+
+    $scope.clothesStyle = [
+        "纯色",
+        "线条/格子/色块",
+        "图案(抽象,卡通,画等)"
+    ];
+
+    $scope.curOptions = [];
+    $scope.curOptionName = "";
+
+    $scope.curOptions = $scope.hair;
+    $scope.curOptionName = "发型";
+
+    $ionicModal.fromTemplateUrl(
+        'templates/option.html',
+        function($ionicModal) {
+            $scope.modal = $ionicModal;
+        },
+        {
+            // Use our scope for the scope of the modal to keep it simple
+            scope: $scope,
+            // The animation we want to use for the modal entrance
+            animation: 'slide-in-up'
+        }
+    );
+
+    $scope.clickInfoItem = function(item){
+        switch(item) {
+            case "发型":
+                $scope.curOptions = $scope.hair;
+                break;
+            case "眼镜":
+                $scope.curOptions = $scope.glasses;
+                break;
+            case "衣服类型":
+                $scope.curOptions = $scope.clothesType;
+                break;
+            case "衣服颜色":
+                $scope.curOptions = $scope.clothesColor;
+                break;
+            case "衣服花纹":
+                $scope.curOptions = $scope.clothesStyle;
+                break;
+            default:
+        }
+        $scope.curOptionName = item;
+        $scope.modal.show();
+    }
+
+    $scope.clickItem = function(item){
+        switch($scope.curOptionName) {
+            case "发型":
+                $scope.myInfo.hair = item;
+                break;
+            case "眼镜":
+                $scope.myInfo.glasses = item;
+                break;
+            case "衣服类型":
+                $scope.myInfo.clothesType = item;
+                break;
+            case "衣服颜色":
+                $scope.myInfo.clothesColor = item;
+                break;
+            case "衣服花纹":
+                $scope.myInfo.clothesStyle = item;
+                break;
+            default:
+
+        }
+        $scope.modal.hide();
+    }
+
+    $scope.takePhoto = function(){
+        try{
+            var options = {
+                quality: 30,
+                destinationType: Camera.DestinationType.DATA_URL,
+                sourceType: Camera.PictureSourceType.CAMERA,
+                allowEdit: true,
+                encodingType: Camera.EncodingType.JPEG,
+                targetWidth: 200,
+                targetHeight: 200,
+                popoverOptions: CameraPopoverOptions,
+                saveToPhotoAlbum: false
+            };
+
+            $cordovaCamera.getPicture(options).then(function(imageData) {
+//            var image = document.getElementById('myImage');
+//            image.src = "data:image/jpeg;base64," + imageData;
+                $scope.imgURI = "data:image/jpeg;base64," + imageData;
+            }, function(err) {
+                // error
+                alert(err);
+            });
+        }
+        catch (e) {
+            alert(e);
+        }
+    }
 });
 
-app.controller('profileCtrl', function($scope, $state) {
-
+app.controller('profileCtrl', function($scope, $state, $ionicHistory) {
+    $scope.logout = function(){
+        $state.go('login');
+        $ionicHistory.clearHistory();
+    }
 });
 
-app.controller('chatCtrl', function($scope, $state, $timeout, $ionicScrollDelegate) {
+app.controller('chatCtrl', function($scope, $state, $stateParams, $timeout, $ionicScrollDelegate) {
+    $scope.meetId = $stateParams.meetId;
+
     $scope.showTime = true;
 
     var alternate,

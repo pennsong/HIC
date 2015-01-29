@@ -1,4 +1,3 @@
-
 /*!
  * ionic.bundle.js is a concatenation of:
  * ionic.js, angular.js, angular-animate.js,
@@ -47498,19 +47497,16 @@ function($scope, scrollViewOptions, $timeout, $window, $location, $document, $io
   };
 
   self.scrollTop = function(shouldAnimate, noBlur) {
-      if (!noBlur)
-      {
+      if (!noBlur) {
           ionic.DomUtil.blurAll();
       }
-
     self.resize().then(function() {
       scrollView.scrollTo(0, 0, !!shouldAnimate);
     });
   };
 
   self.scrollBottom = function(shouldAnimate, noBlur) {
-      if (!noBlur)
-      {
+      if (!noBlur) {
           ionic.DomUtil.blurAll();
       }
     self.resize().then(function() {
