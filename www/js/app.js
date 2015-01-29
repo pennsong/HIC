@@ -83,6 +83,15 @@ app.config(function($stateProvider, $urlRouterProvider){
                     controller: 'chatCtrl'
                 }
             }
+        })
+        .state('tab.meet.create', {
+            url: '/chat/{meetId}',
+            views: {
+                'contact': {
+                    templateUrl: 'templates/contact-chat.html',
+                    controller: 'chatCtrl'
+                }
+            }
         });
 
 });
@@ -458,13 +467,22 @@ app.controller('infoCtrl', function($scope, $state, $ionicModal, $cordovaCamera)
 });
 
 app.controller('profileCtrl', function($scope, $state, $ionicHistory) {
+
     $scope.logout = function(){
+        $ionicHistory.nextViewOptions({
+            disableAnimate: true,
+            disableBack: true,
+            historyRoot: true
+        });
         $state.go('login');
-        $ionicHistory.clearHistory();
+    }
+
+    $scope.his = function(){
+        console.log($ionicHistory.viewHistory());
     }
 });
 
-app.controller('chatCtrl', function($scope, $state, $stateParams, $timeout, $ionicScrollDelegate) {
+app.controller('chatCtrl', function($scope, $state, $stateParams, $timeout, $ionicScrollDelegate, $ionicHistory) {
     $scope.meetId = $stateParams.meetId;
 
     $scope.showTime = true;
