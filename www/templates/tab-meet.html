@@ -1,12 +1,12 @@
 <ion-view view-title="我的嗨羞">
     <ion-nav-buttons side="primary">
-        <a class="button button-icon icon ion-plus-round" ui-sref="tab.meet.create">
+        <a class="button button-icon icon ion-plus-round" ui-sref="tab.meet.condition">
         </a>
     </ion-nav-buttons>
     <ion-content>
         <div class="list">
-            <a class="item item-thumbnail-left" href="#" ng-repeat="meet in meets">
-                <img ng-src="{{meet.createrPic}}">
+            <a class="item item-thumbnail-left" href="#" ng-repeat="meet in meets" ng-click="clickMeet(meet)">
+                <img ng-src="data:image/png;base64,{{meet.targetSmallPic}}">
                 <h2>{{meet.locName}}</h2>
                 <p>{{meet.type}}</p>
                 <p>{{meet.status}}</p>

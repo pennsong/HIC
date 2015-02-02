@@ -9,5 +9,7 @@
         <button class="button button-full button-positive" ng-click="his()">
             history
         </button>
+            <div class="col">{{locationValErr}}</div>
+            <div class="col" ng-repeat="item in locs track by $index">{{item}}</div>
     </ion-content>
 </ion-view>

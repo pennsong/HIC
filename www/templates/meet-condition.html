@@ -1,8 +1,8 @@
-<ion-view view-title="嗨羞邀请">
+<ion-view view-title="嗨羞筛选">
     <ion-content padding="true">
         <div class="card">
             <a href="#" class="item item-icon-left" ng-click="clickInfoItem('地点')">
-                <i class="icon ion-ios-person"></i>
+                <i class="icon ion-location"></i>
                 地点
                 <span class="item-note">
                   {{meet.loc.locName}}
@@ -11,7 +11,7 @@
         </div>
         <div class="list card">
             <a href="#" class="item item-icon-left" ng-click="clickInfoItem('性别')">
-                <i class="icon ion-ios-person"></i>
+                <i class="icon ion-transgender"></i>
                 性别
                 <span class="item-note">
                   {{meet.sex}}
@@ -58,21 +58,7 @@
                 </span>
             </a>
         </div>
-        <button class="button button-block button-balanced icon ion-search">
-        </button>
-        <div style="text-align:center" ng-repeat="item in specialPics">
-            <div class="row" ng-if="$even">
-                <div class="col">
-                    <a href="#">
-                        <img style="width: 120px" ng-src="{{specialPics[$index].fileName}}">
-                    </a>
-                </div>
-                <div class="col">
-                    <a href="#">
-                        <img style="width: 120px"  ng-src="{{specialPics[$index + 1].fileName}}">
-                    </a>
-                </div>
-            </div>
-        </div>
+        <a class="button button-block button-balanced icon ion-search" ui-sref="tab.meet.condition.specialPic">
+        </a>
     </ion-content>
 </ion-view>

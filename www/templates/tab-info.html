@@ -52,8 +52,8 @@
                 拍摄特征图片帮助...
             </div>
             <div class="text-center" style="padding-top:10px">
-                <img ng-show="imgURI !== undefined" ng-src="{{imgURI}}">
-                <img ng-show="imgURI == undefined" ng-src="img/200x200.gif">
+                <img ng-show="myInfo.bigPicData !== undefined" ng-src="data:image/png;base64,{{myInfo.bigPicData}}">
+                <img ng-show="myInfo.bigPicData == undefined" ng-src="img/200x200.gif">
             </div>
             <div class="padding">
                 <button class="button button-block button-positive" ng-click="takePhoto()">

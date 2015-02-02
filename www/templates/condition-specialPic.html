@@ -1,0 +1,80 @@
+<ion-view view-title="特征图片">
+    <ion-content padding="true">
+        <!--<div class="card">-->
+            <!--<a href="#" class="item item-icon-left" ng-click="clickInfoItem('地点')">-->
+                <!--<i class="icon ion-ios-person"></i>-->
+                <!--地点-->
+                <!--<span class="item-note">-->
+                  <!--{{meet.loc.locName}}-->
+                <!--</span>-->
+            <!--</a>-->
+        <!--</div>-->
+        <!--<div class="list card">-->
+            <!--<a href="#" class="item item-icon-left" ng-click="clickInfoItem('性别')">-->
+                <!--<i class="icon ion-ios-person"></i>-->
+                <!--性别-->
+                <!--<span class="item-note">-->
+                  <!--{{meet.sex}}-->
+                <!--</span>-->
+            <!--</a>-->
+
+            <!--<a href="#" class="item item-icon-left" ng-click="clickInfoItem('发型')">-->
+                <!--<i class="icon ion-ios-person"></i>-->
+                <!--发型-->
+                <!--<span class="item-note">-->
+                  <!--{{meet.hair}}-->
+                <!--</span>-->
+            <!--</a>-->
+
+            <!--<a href="#" class="item item-icon-left" ng-click="clickInfoItem('眼镜')">-->
+                <!--<i class="icon ion-ios-glasses"></i>-->
+                <!--眼镜-->
+                <!--<span class="item-note">-->
+                  <!--{{meet.glasses}}-->
+                <!--</span>-->
+            <!--</a>-->
+
+            <!--<a href="#" class="item item-icon-left" ng-click="clickInfoItem('衣服类型')">-->
+                <!--<i class="icon ion-tshirt"></i>-->
+                <!--衣服类型-->
+                <!--<span class="item-note">-->
+                  <!--{{meet.clothesType}}-->
+                <!--</span>-->
+            <!--</a>-->
+
+            <!--<a href="#" class="item item-icon-left" ng-click="clickInfoItem('衣服颜色')">-->
+                <!--<i class="icon ion-android-color-palette"></i>-->
+                <!--衣服颜色-->
+                <!--<span class="item-note">-->
+                  <!--{{meet.clothesColor}}-->
+                <!--</span>-->
+            <!--</a>-->
+
+            <!--<a href="#" class="item item-icon-left" ng-click="clickInfoItem('衣服花纹')">-->
+                <!--<i class="icon ion-ios-medical"></i>-->
+                <!--衣服花纹-->
+                <!--<span class="item-note">-->
+                  <!--{{meet.clothesStyle}}-->
+                <!--</span>-->
+            <!--</a>-->
+        <!--</div>-->
+
+        <div style="text-align:center" ng-repeat="item in specialPics">
+            <div class="row" ng-if="$even">
+                <div class="col">
+                    <a href="#" ng-click="bigPic(specialPics[$index].fileName)">
+                        <img style="width: 120px" ng-src="{{specialPics[$index].fileName}}">
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="#" ng-click="bigPic(specialPics[$index + 1].fileName)">
+                        <img style="width: 120px"  ng-src="{{specialPics[$index + 1].fileName}}">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <button class="button button-block button-stable icon ion-heart-broken" ng-click="no()">
+            不在其中
+        </button>
+    </ion-content>
+</ion-view>
