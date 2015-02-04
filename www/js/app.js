@@ -3,7 +3,6 @@
 function ppCopyObj(source, destination) {
     for (var property in destination) {
         if (typeof destination[property] === "object") {
-            console.log(property);
             ppCopyObj(source[property], destination[property]);
         } else {
             destination[property] = source[property];
@@ -174,6 +173,13 @@ app.controller('baseCtrl', function($scope, $state){
         password: ''
     }
 
+    $scope.newUser = {
+        username: '',
+        password: '',
+        sex: '',
+        nickname: ''
+    }
+
     $scope.searchMode;
 
     $scope.serverRoot = "http://10.0.1.5:3000/";
@@ -312,6 +318,13 @@ app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup) {
     };
 
     $scope.goRegister = function(){
+        $scope.$parent.newUser = {
+            username: '',
+            password: '',
+            sex: '',
+            nickname: ''
+        }
+
         $state.go("register");
     }
 
@@ -344,9 +357,48 @@ app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup) {
     }
 });
 
-app.controller('registerCtrl', function($scope, $state) {
-    $scope.goLogin = function(){
-        $state.go("login");
+app.controller('registerCtrl', function($scope, $state, $http, $ionicPopup) {
+    $scope.showPopup = function(msg) {
+        var alertPopup = $ionicPopup.alert({
+            title: '注意',
+            template: msg
+        });
+        alertPopup.then(function(res) {
+        });
+    };
+
+    $scope.register = function(newUser){
+//        if (!(newUser.username && newUser.password && newUser.sex && newUser.nickname))
+//        {
+//            $scope.showPopup('用户名, 密码, 性别, 昵称都不能为空!');
+//            return;
+//        }
+        $http.post(
+                $scope.$parent.serverRoot + 'register',
+            {
+                newUser: newUser
+            }
+        )
+            .success(function(data, status, headers, config) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.$parent.user.username = data.result;
+                window.localStorage['username'] = data.result;
+                $state.go("tab.meet")
+            }).
+            error(function(data, status, headers, config) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                if (status == 0)
+                {
+                    $scope.showPopup('网络不给力哦!'+ "(" + status + ")");
+                }
+                else
+                {
+                    $scope.showPopup(data.result + "(" + status + ")");
+                }
+            }
+        );
     }
 });
 
