@@ -177,12 +177,13 @@ app.controller('baseCtrl', function($scope, $state){
         username: '',
         password: '',
         sex: '',
-        nickname: ''
+        nickname: '',
+        cid: ''
     }
 
     $scope.searchMode;
 
-    $scope.serverRoot = "http://10.0.1.5:3000/";
+    $scope.serverRoot = "http://192.168.1.6:3000/";
     $scope.imagePath = $scope.serverRoot + 'images/';
     $scope.sysImagePath = $scope.serverRoot + 'images/system/';
 
@@ -306,7 +307,7 @@ app.controller('baseCtrl', function($scope, $state){
     ];
 });
 
-app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup) {
+app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup, $cordovaDevice) {
 
     $scope.showPopup = function(msg) {
         var alertPopup = $ionicPopup.alert({
@@ -322,7 +323,8 @@ app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup) {
             username: '',
             password: '',
             sex: '',
-            nickname: ''
+            nickname: '',
+            cid: ''
         }
 
         $state.go("register");
@@ -334,11 +336,12 @@ app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup) {
             $scope.showPopup('用户名和密码都不能为空!');
             return;
         }
-        $http.put(
+        $http.post(
                 $scope.$parent.serverRoot + 'login',
             {
                 username: user.username,
-                password: user.password
+                password: user.password,
+                cid: 't1'//$cordovaDevice.getUUID()
             }
         )
             .success(function(data, status, headers, config) {
@@ -351,13 +354,14 @@ app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup) {
             error(function(data, status, headers, config) {
                 // called asynchronously if an error occurs
                 // or server returns response with an error status.
-                alert("err:" + status);
+                $scope.showPopup(data.result + "(" + status + ")");
+                return;
             }
         );
     }
 });
 
-app.controller('registerCtrl', function($scope, $state, $http, $ionicPopup) {
+app.controller('registerCtrl', function($scope, $state, $http, $ionicPopup, $cordovaDevice) {
     $scope.showPopup = function(msg) {
         var alertPopup = $ionicPopup.alert({
             title: '注意',
@@ -368,11 +372,12 @@ app.controller('registerCtrl', function($scope, $state, $http, $ionicPopup) {
     };
 
     $scope.register = function(newUser){
-//        if (!(newUser.username && newUser.password && newUser.sex && newUser.nickname))
-//        {
-//            $scope.showPopup('用户名, 密码, 性别, 昵称都不能为空!');
-//            return;
-//        }
+        newUser.cid = 't2';//$cordovaDevice.getUUID();
+        if (!(newUser.username && newUser.password && newUser.sex && newUser.nickname && newUser.cid))
+        {
+            $scope.showPopup('用户名, 密码, 性别, 昵称都不能为空!');
+            return;
+        }
         $http.post(
                 $scope.$parent.serverRoot + 'register',
             {
