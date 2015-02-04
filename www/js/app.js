@@ -449,9 +449,31 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
 
 });
 
-app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http) {
+app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http, $ionicPopup) {
+    $scope.showPopup = function(msg) {
+        var alertPopup = $ionicPopup.alert({
+            title: '注意',
+            template: msg
+        });
+        alertPopup.then(function(res) {
+        });
+    };
 
     $scope.searchTargets = function(){
+        if (!(
+            $scope.$parent.meetCondition.specialInfo.sex
+            && $scope.$parent.meetCondition.specialInfo.clothesColor
+            && $scope.$parent.meetCondition.specialInfo.clothesStyle
+            && $scope.$parent.meetCondition.specialInfo.clothesType
+            && $scope.$parent.meetCondition.specialInfo.glasses
+            && $scope.$parent.meetCondition.specialInfo.hair
+            && $scope.$parent.meetCondition.mapLoc
+            )){
+            $scope.showPopup('请把条件填写完整!');
+            return;
+        }
+
+
         $http.post(
                 $scope.$parent.serverRoot + 'searchTargets',
             {
@@ -712,7 +734,7 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
     };
 
     $scope.myGoBack = function() {
-        if (
+        if (!(
             $scope.$parent.myInfo.specialInfo.sex
             && $scope.$parent.myInfo.specialInfo.clothesColor
             && $scope.$parent.myInfo.specialInfo.clothesStyle
@@ -720,7 +742,7 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
             && $scope.$parent.myInfo.specialInfo.glasses
             && $scope.$parent.myInfo.specialInfo.hair
             && $scope.$parent.myInfo.specialPic
-            ){
+            )){
             $scope.showPopup('请填写完整!');
             return;
         }
