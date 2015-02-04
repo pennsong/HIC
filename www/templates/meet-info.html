@@ -1,17 +1,17 @@
 <ion-view view-title="我的特征">
-    <ion-header-bar align-title="center" class="bar-positive">
-        <h1 class="title">我的特征</h1>
+    <ion-nav-bar class="bar-positive">
+        <ion-nav-back-button ng-click="myGoBack()">
+        </ion-nav-back-button>
+    </ion-nav-bar>
 
-    </ion-header-bar>
     <ion-content>
 
         <div class="list card">
-
             <a href="#" class="item item-icon-left" ng-click="clickInfoItem('发型')">
                 <i class="icon ion-ios-person"></i>
                 发型
                 <span class="item-note">
-                  {{myInfo.hair}}
+                  {{myInfo.specialInfo.hair}}
                 </span>
             </a>
 
@@ -19,7 +19,7 @@
                 <i class="icon ion-ios-glasses"></i>
                 眼镜
                 <span class="item-note">
-                  {{myInfo.glasses}}
+                  {{myInfo.specialInfo.glasses}}
                 </span>
             </a>
 
@@ -27,7 +27,7 @@
                 <i class="icon ion-tshirt"></i>
                 衣服类型
                 <span class="item-note">
-                  {{myInfo.clothesType}}
+                  {{myInfo.specialInfo.clothesType}}
                 </span>
             </a>
 
@@ -35,7 +35,7 @@
                 <i class="icon ion-android-color-palette"></i>
                 衣服颜色
                 <span class="item-note">
-                  {{myInfo.clothesColor}}
+                  {{myInfo.specialInfo.clothesColor}}
                 </span>
             </a>
 
@@ -43,7 +43,7 @@
                 <i class="icon ion-ios-medical"></i>
                 衣服花纹
                 <span class="item-note">
-                  {{myInfo.clothesStyle}}
+                  {{myInfo.specialInfo.clothesStyle}}
                 </span>
             </a>
         </div>
@@ -52,8 +52,8 @@
                 拍摄特征图片帮助...
             </div>
             <div class="text-center" style="padding-top:10px">
-                <img ng-show="myInfo.bigPicData !== undefined" ng-src="data:image/png;base64,{{myInfo.bigPicData}}">
-                <img ng-show="myInfo.bigPicData == undefined" ng-src="img/200x200.gif">
+                <img class="middleImg" ng-if="myInfo.specialPic" ng-src="{{myInfo.specialPic.length > 100 ? myInfo.specialPic : imagePath + 'middle/' + myInfo.specialPic}}">
+                <img class="middleImg" ng-if="!myInfo.specialPic" ng-src="img/200x200.gif">
             </div>
             <div class="padding">
                 <button class="button button-block button-positive" ng-click="takePhoto()">

@@ -72,3 +72,8 @@ span.message {
     border-radius: 10px;
     text-align: left;
     max-width: 240px; }
+
+img.middleImg{
+    width: 200px;
+    height: 200px;
+}

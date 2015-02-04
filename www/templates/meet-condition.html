@@ -5,7 +5,7 @@
                 <i class="icon ion-location"></i>
                 地点
                 <span class="item-note">
-                  {{meet.loc.locName}}
+                  {{meetCondition.mapLoc.name}}
                 </span>
             </a>
         </div>
@@ -14,7 +14,7 @@
                 <i class="icon ion-transgender"></i>
                 性别
                 <span class="item-note">
-                  {{meet.sex}}
+                  {{meetCondition.specialInfo.sex}}
                 </span>
             </a>
 
@@ -22,7 +22,7 @@
                 <i class="icon ion-ios-person"></i>
                 发型
                 <span class="item-note">
-                  {{meet.hair}}
+                  {{meetCondition.specialInfo.hair}}
                 </span>
             </a>
 
@@ -30,7 +30,7 @@
                 <i class="icon ion-ios-glasses"></i>
                 眼镜
                 <span class="item-note">
-                  {{meet.glasses}}
+                  {{meetCondition.specialInfo.glasses}}
                 </span>
             </a>
 
@@ -38,7 +38,7 @@
                 <i class="icon ion-tshirt"></i>
                 衣服类型
                 <span class="item-note">
-                  {{meet.clothesType}}
+                  {{meetCondition.specialInfo.clothesType}}
                 </span>
             </a>
 
@@ -46,7 +46,7 @@
                 <i class="icon ion-android-color-palette"></i>
                 衣服颜色
                 <span class="item-note">
-                  {{meet.clothesColor}}
+                  {{meetCondition.specialInfo.clothesColor}}
                 </span>
             </a>
 
@@ -54,11 +54,11 @@
                 <i class="icon ion-ios-medical"></i>
                 衣服花纹
                 <span class="item-note">
-                  {{meet.clothesStyle}}
+                  {{meetCondition.specialInfo.clothesStyle}}
                 </span>
             </a>
         </div>
-        <a class="button button-block button-balanced icon ion-search" ui-sref="tab.meet.condition.specialPic">
+        <a class="button button-block button-balanced icon ion-search" ng-click="searchTargets()">
         </a>
     </ion-content>
 </ion-view>

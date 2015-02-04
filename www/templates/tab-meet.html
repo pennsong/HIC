@@ -1,16 +1,20 @@
-<ion-view view-title="我的嗨羞">
+<ion-view view-title="{{user.username}}的嗨羞">
     <ion-nav-buttons side="primary">
-        <a class="button button-icon icon ion-plus-round" ui-sref="tab.meet.condition">
+        <a class="button button-icon icon ion-plus-round" ng-click="createMeet()">
+        </a>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="secondary">
+        <a class="button button-icon icon ion-ios-body" ng-click="enterInfo()">
         </a>
     </ion-nav-buttons>
     <ion-content>
         <div class="list">
-            <a class="item item-thumbnail-left" href="#" ng-repeat="meet in meets" ng-click="clickMeet(meet)">
-                <img ng-src="data:image/png;base64,{{meet.targetSmallPic}}">
-                <h2>{{meet.locName}}</h2>
-                <p>{{meet.type}}</p>
-                <p>{{meet.status}}</p>
-                <p>{{meet.createTime}} 还剩{{meet.endTime}}</p>
+            <a class="item item-thumbnail-left" href="#" ng-repeat="item in meets" ng-click="clickMeet(item)">
+                <img ng-src="{{item.logo}}">
+                <h2>{{item.mapLoc.name}}</h2>
+                <p>{{item.mapLoc.address}}</p>
+                <p>{{item.status}}</p>
+                <p>{{item.createTime}}</p>
             </a>
         </div>
     </ion-content>
