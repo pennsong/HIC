@@ -167,7 +167,7 @@ app.directive('input', function($timeout){
     }
 });
 
-app.controller('baseCtrl', function($scope, $state){
+app.controller('baseCtrl', function($scope, $state, $ionicPopup){
     $scope.user = {
         username: window.localStorage['username'] || '',
         password: ''
@@ -181,9 +181,38 @@ app.controller('baseCtrl', function($scope, $state){
         cid: ''
     }
 
+    $scope.showPopup = function(msg) {
+        var alertPopup = $ionicPopup.alert({
+            title: '注意',
+            template: msg
+        });
+        alertPopup.then(function(res) {
+        });
+    };
+
+    $scope.urlForImage = function(imageName) {
+        var name = imageName.substr(imageName.lastIndexOf('/') + 1);
+        var trueOrigin = cordova.file.tempDirectory + name;
+        return trueOrigin;
+    }
+
+    $scope.ppError = function(data, status, headers, config) {
+        // called asynchronously if an error occurs
+        // or server returns response with an error status.
+        if (status == 0)
+        {
+            $scope.showPopup('网络不给力哦!'+ "(" + status + ")");
+        }
+        else
+        {
+            $scope.showPopup(data.result + "(" + status + ")");
+        }
+    }
+
     $scope.searchMode;
 
-    $scope.serverRoot = "http://192.168.1.6:3000/";
+    //$scope.serverRoot = "http://192.168.1.6:3000/";
+    $scope.serverRoot = "http://10.0.1.5:3000/";
     $scope.imagePath = $scope.serverRoot + 'images/';
     $scope.sysImagePath = $scope.serverRoot + 'images/system/';
 
@@ -206,7 +235,8 @@ app.controller('baseCtrl', function($scope, $state){
             "glasses" : null,
             "hair" : null
         },
-        specialPic: null
+        specialPic: null,
+        specialPicDisplay: null
     }
 
     $scope.meetCondition = {
@@ -309,15 +339,6 @@ app.controller('baseCtrl', function($scope, $state){
 
 app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup, $cordovaDevice) {
 
-    $scope.showPopup = function(msg) {
-        var alertPopup = $ionicPopup.alert({
-            title: '注意',
-            template: msg
-        });
-        alertPopup.then(function(res) {
-        });
-    };
-
     $scope.goRegister = function(){
         $scope.$parent.newUser = {
             username: '',
@@ -333,7 +354,7 @@ app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup, $cordov
     $scope.login = function(user){
         if (!user.username || !user.password)
         {
-            $scope.showPopup('用户名和密码都不能为空!');
+            $scope.$parent.showPopup('用户名和密码都不能为空!');
             return;
         }
         $http.post(
@@ -351,31 +372,16 @@ app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup, $cordov
                 window.localStorage['username'] = data.result;
                 $state.go("tab.meet")
             }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-                $scope.showPopup(data.result + "(" + status + ")");
-                return;
-            }
-        );
+            error($scope.$parent.ppError);
     }
 });
 
 app.controller('registerCtrl', function($scope, $state, $http, $ionicPopup, $cordovaDevice) {
-    $scope.showPopup = function(msg) {
-        var alertPopup = $ionicPopup.alert({
-            title: '注意',
-            template: msg
-        });
-        alertPopup.then(function(res) {
-        });
-    };
-
     $scope.register = function(newUser){
         newUser.cid = 't2';//$cordovaDevice.getUUID();
         if (!(newUser.username && newUser.password && newUser.sex && newUser.nickname && newUser.cid))
         {
-            $scope.showPopup('用户名, 密码, 性别, 昵称都不能为空!');
+            $scope.$parent.showPopup('用户名, 密码, 性别, 昵称都不能为空!');
             return;
         }
         $http.post(
@@ -391,19 +397,7 @@ app.controller('registerCtrl', function($scope, $state, $http, $ionicPopup, $cor
                 window.localStorage['username'] = data.result;
                 $state.go("tab.meet")
             }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-                if (status == 0)
-                {
-                    $scope.showPopup('网络不给力哦!'+ "(" + status + ")");
-                }
-                else
-                {
-                    $scope.showPopup(data.result + "(" + status + ")");
-                }
-            }
-        );
+            error($scope.$parent.ppError);
     }
 });
 
@@ -477,12 +471,7 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
                 $scope.$parent.meets.unshift(newItem);
                 $state.go("tab.meet")
             }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-                alert("err:" + status);
-            }
-        );
+            error($scope.$parent.ppError);
 
 
         $ionicHistory.nextViewOptions({
@@ -507,15 +496,6 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
 });
 
 app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http, $ionicPopup) {
-    $scope.showPopup = function(msg) {
-        var alertPopup = $ionicPopup.alert({
-            title: '注意',
-            template: msg
-        });
-        alertPopup.then(function(res) {
-        });
-    };
-
     $scope.searchTargets = function(){
         if (!(
             $scope.$parent.meetCondition.specialInfo.sex
@@ -526,7 +506,7 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
             && $scope.$parent.meetCondition.specialInfo.hair
             && $scope.$parent.meetCondition.mapLoc
             )){
-            $scope.showPopup('请把条件填写完整!');
+            $scope.$parent.showPopup('请把条件填写完整!');
             return;
         }
 
@@ -543,12 +523,7 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
                 $scope.$parent.targets = data.result;
                 $state.go('tab.meet.condition.specialPic');
             }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-                alert("err:" + status);
-            }
-        );
+            error($scope.$parent.ppError);
     }
 
     $ionicModal.fromTemplateUrl(
@@ -628,7 +603,6 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
 });
 
 app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
-
     $http.get($scope.$parent.serverRoot + "getMeets?username=" + $scope.$parent.user.username).
         success(function(data, status, headers, config) {
             tmpArray = data.result.map(function(item){
@@ -665,12 +639,7 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
             });
             $scope.$parent.meets = tmpArray;
         }).
-        error(function(data, status, headers, config) {
-            // called asynchronously if an error occurs
-            // or server returns response with an error status.
-            alert('err:' + status);
-        }
-    );
+        error($scope.$parent.ppError);
 
     $scope.createMeet = function(){
         $scope.$parent.searchMode = '发起';
@@ -693,17 +662,17 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
     }
 
     $scope.enterInfo = function(){
-        $http.get($scope.$parent.serverRoot + "getSpecialInfo?username=" + $scope.$parent.user.username).
+        $http.get($scope.$parent.serverRoot + "getInfo?username=" + $scope.$parent.user.username).
             success(function(data, status, headers, config) {
                 $scope.$parent.myInfo = data.result;
+                if ($scope.$parent.myInfo.specialPic)
+                {
+                    $scope.$parent.myInfo.specialPicDisplay = $scope.$parent.serverRoot + "images/middle/" + $scope.$parent.myInfo.specialPic;
+                }
+
                 $state.go('tab.meet.info');
             }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-                alert('err:' + status);
-            }
-        );
+            error($scope.$parent.ppError);
     }
 
     $ionicModal.fromTemplateUrl(
@@ -767,12 +736,7 @@ app.controller('contactCtrl', function($scope, $state, $http) {
         success(function(data, status, headers, config) {
             $scope.$parent.friends = data.result;
         }).
-        error(function(data, status, headers, config) {
-            // called asynchronously if an error occurs
-            // or server returns response with an error status.
-            alert('err:' + status);
-        }
-    );
+        error($scope.$parent.ppError);
 
     $scope.clickChat = function(friendUsername){
         $scope.$parent.curChatFriendUsername = friendUsername;
@@ -780,16 +744,7 @@ app.controller('contactCtrl', function($scope, $state, $http) {
     }
 });
 
-app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCamera, $http, $ionicPopup) {
-    $scope.showPopup = function(msg) {
-        var alertPopup = $ionicPopup.alert({
-            title: '注意',
-            template: msg
-        });
-        alertPopup.then(function(res) {
-        });
-    };
-
+app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCamera, $http, $cordovaFile) {
     $scope.myGoBack = function() {
         if (!(
             $scope.$parent.myInfo.specialInfo.sex
@@ -800,14 +755,15 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
             && $scope.$parent.myInfo.specialInfo.hair
             && $scope.$parent.myInfo.specialPic
             )){
-            $scope.showPopup('请填写完整!');
+            $scope.$parent.showPopup('请填写完整!');
             return;
         }
-        $http.put(
+        $http.post(
                 $scope.$parent.serverRoot + 'updateInfo',
             {
                 username: $scope.$parent.user.username,
-                myInfo: $scope.$parent.myInfo
+                myInfo: $scope.$parent.myInfo,
+                latestLocation: window.localStorage['latestLocation'] ? packageJSON(window.localStorage['latestLocation']) : null
             }
         )
             .success(function(data, status, headers, config) {
@@ -815,12 +771,7 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
                 // when the response is available
                 $state.go('tab.meet');
             }).
-            error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-                alert("err:" + status);
-            }
-        );
+            error($scope.$parent.ppError);
     };
 
     $ionicModal.fromTemplateUrl(
@@ -886,27 +837,54 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
         try{
             var options = {
                 quality: 30,
-                destinationType: Camera.DestinationType.DATA_URL,
+                destinationType: Camera.DestinationType.FILE_URI,
                 sourceType: Camera.PictureSourceType.CAMERA,
                 allowEdit: true,
                 encodingType: Camera.EncodingType.JPEG,
                 targetWidth: 200,
                 targetHeight: 200,
                 popoverOptions: CameraPopoverOptions,
-                saveToPhotoAlbum: false
+                saveToPhotoAlbum: true
             };
 
-            $cordovaCamera.getPicture(options).then(function(imageData) {
-//            var image = document.getElementById('myImage');
-//            image.src = "data:image/jpeg;base64," + imageData;
-                $scope.$parent.myInfo.specialPic = "data:image/jpeg;base64," + imageData;
+            $cordovaCamera.getPicture(options).then(function(fileURL) {
+                $scope.$parent.myInfo.specialPicDisplay = fileURL;
+
+                var options = {
+                    fileKey: "avatar",
+                    fileName: "image.png",
+                    chunkedMode: false,
+                    mimeType: "image/png"
+                };
+
+                $cordovaFile.uploadFile($scope.$parent.serverRoot + 'uploadSpecialPic', fileURL, options).then(function(result) {
+                    $scope.$parent.myInfo.specialPic = (JSON.parse(result.response))["result"];
+                    $scope.showPopup("SUCCESS: " + result.response);
+                }, function(err) {
+                    $scope.showPopup("ERROR: " + JSON.stringify(err));
+                }, function (progress) {
+                    // constant progress updates
+                });
             }, function(err) {
                 // error
-                alert(err);
+                $scope.showPopup(err);
             });
         }
-        catch (e) {
-            alert(e);
+        catch (err) {
+            //$scope.showPopup(err);
+            var options = {
+                fileKey: "avatar",
+                fileName: "image.png",
+                chunkedMode: false,
+                mimeType: "image/png"
+            };
+            $cordovaFile.uploadFile($scope.$parent.serverRoot + 'uploadSpecialPic', "/Users/pennsong/Desktop/a.jpg", options).then(function(result) {
+                console.log("SUCCESS: " + JSON.stringify(result.response));
+            }, function(err) {
+                console.log("ERROR: " + JSON.stringify(err));
+            }, function (progress) {
+                // constant progress updates
+            });
         }
     }
 });
@@ -941,8 +919,13 @@ app.controller('profileCtrl', function($scope, $state, $ionicHistory, $interval)
 //                    '<hr />'      + element.innerHTML;
         var d = new Date();
         d = d.toLocaleTimeString().replace(/:\d+ /, ' ');
-        window.localStorage['locationVal'] = (d + ":" + position.coords.latitude + "," + position.coords.longitude);
-        $scope.mapLocs.unshift(window.localStorage['locationVal']);
+        var latestLocation = {
+            lng: position.coords.longitude,
+            lat: position.coords.latitude,
+            time: d
+        }
+        window.localStorage['latestLocation'] = JSON.stringify(latestLocation);
+        $scope.mapLocs.unshift(window.localStorage['latestLocation']);
     }
 
 // onError Callback receives a PositionError object

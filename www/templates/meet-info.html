@@ -60,8 +60,8 @@
                 拍摄特征图片帮助...
             </div>
             <div class="text-center" style="padding-top:10px">
-                <img class="middleImg" ng-if="myInfo.specialPic" ng-src="{{myInfo.specialPic.length > 100 ? myInfo.specialPic : imagePath + 'middle/' + myInfo.specialPic}}">
-                <img class="middleImg" ng-if="!myInfo.specialPic" ng-src="img/200x200.gif">
+                <img class="middleImg" ng-if="myInfo.specialPicDisplay" ng-src="{{myInfo.specialPicDisplay}}">
+                <img class="middleImg" ng-if="!myInfo.specialPicDisplay" ng-src="img/200x200.gif">
             </div>
             <div class="padding">
                 <button class="button button-block button-positive" ng-click="takePhoto()">
