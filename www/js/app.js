@@ -181,6 +181,8 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
         cid: ''
     }
 
+    $scope.curMeet = null;
+
     $scope.showPopup = function(msg) {
         var alertPopup = $ionicPopup.alert({
             title: '注意',
@@ -240,6 +242,7 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
     }
 
     $scope.meetCondition = {
+        meetId: null,
         mapLoc: {
             uid: '',
             name: '',
@@ -262,31 +265,6 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
     $scope.targets = [];
 
     $scope.mapLocs = [
-        {
-            "uid":"82cf55ea33c0f0eefbdc856b",
-            "name":"北京银行ATM1",
-            "address":"北京市东城区东长安街天安门内"
-        },
-        {
-            "uid":"82cf55ea33c0f0eefbdc856b",
-            "name":"北京银行ATM2",
-            "address":"北京市东城区东长安街天安门内"
-        },
-        {
-            "uid":"82cf55ea33c0f0eefbdc856b",
-            "name":"北京银行ATM3",
-            "address":"北京市东城区东长安街天安门内"
-        },
-        {
-            "uid":"82cf55ea33c0f0eefbdc856b",
-            "name":"北京银行ATM4",
-            "address":"北京市东城区东长安街天安门内"
-        },
-        {
-            "uid":"82cf55ea33c0f0eefbdc856b",
-            "name":"北京银行ATM5",
-            "address":"北京市东城区东长安街天安门内"
-        }
     ];
 
     $scope.sex = [
@@ -424,41 +402,39 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
         $scope.modal.show();
     }
 
-    $scope.yes = function(targetUsername){
+    $scope.uploadMeet = function(status){
+        var targetUsername;
+        if (status == '待回复')
+        {
+            targetUsername = $scope.targetUsername
+        }
         $http.post(
                 $scope.$parent.serverRoot + 'createMeet',
             {
                 creater_username: $scope.$parent.user.username,
                 target_username: targetUsername,
-                status: '待回复',
-                meetCondition: $scope.$parent.meetCondition
+                status: status,
+                meetId: $scope.$parent.meetCondition.meetId,
+                mapLoc: $scope.$parent.meetCondition.mapLoc,
+                specialInfo: $scope.$parent.meetCondition.specialInfo,
+                personLoc: window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null
             }
         )
             .success(function(data, status, headers, config) {
                 // this callback will be called asynchronously
                 // when the response is available
-                var item = data.result;
-
-                var newItem = {
-                    _id : item._id,
-                    creater: item.creater,
-                    target: item.target,
-                    mapLoc : item.mapLoc,
-                    status : item.status,
-                    createTime: "t:" + item._id,
-                    specialInfo: item.specialInfo
-                };
+                var newItem = data.result;
 
                 var logo = null;
-                if (item.creater.username == $scope.user.username)
+                if (newItem.creater.username == $scope.user.username)
                 {
-                    if (item.status == '待确认')
+                    if (newItem.status == '待确认')
                     {
                         logo = $scope.$parent.sysImagePath + "tbd.jpg";
                     }
                     else
                     {
-                        logo = $scope.$parent.imagePath + "small/" + item.target.specialPic;
+                        logo = $scope.$parent.imagePath + "normal/" + newItem.target.specialPic;
                     }
                 }
                 else
@@ -468,34 +444,117 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
 
                 newItem.logo = logo;
 
-                $scope.$parent.meets.unshift(newItem);
-                $state.go("tab.meet")
+                var updateMeet = false;
+                for (var i = 0; i < $scope.$parent.meets.length; i++) {
+                    if ($scope.$parent.meets[i]._id === newItem._id)
+                    {
+                        $scope.$parent.meets[i] = newItem;
+                        updateMeet = true;
+                        break;
+                    }
+                }
+                if (!updateMeet)
+                {
+                    $scope.$parent.meets.unshift(newItem);
+                }
+                $ionicHistory.nextViewOptions({
+                    disableAnimate: true,
+                    disableBack: true,
+                    historyRoot: true
+                });
+                $state.go('tab.meet');
+                $scope.modal.hide();
             }).
             error($scope.$parent.ppError);
+    }
 
+    $scope.yes = function(targetUsername){
+        if (targetUsername == 'fake')
+        {
+            $scope.$parent.showPopup('请仔细选择图片!');
+            $ionicHistory.nextViewOptions({
+                disableAnimate: true,
+                disableBack: true,
+                historyRoot: true
+            });
+            $state.go('tab.meet');
+            $scope.modal.hide();
+        }
+        else
+        {
+            if ($scope.$parent.searchMode == '回复')
+            {
+                if ($scope.$parent.curMeet.creater.username == targetUsername)
+                {
+                    $http.post(
+                            $scope.$parent.serverRoot + 'replySuccess',
+                        {
+                            creater_username: targetUsername,
+                            target_username: $scope.$parent.user.username,
+                            meetId: $scope.$parent.curMeet._id
+                        }
+                    )
+                        .success(function(data, status, headers, config) {
+                            // this callback will be called asynchronously
+                            // when the response is available
+                            $scope.$parent.friends.unshift(data.result);
+                            console.log($scope.$parent.meets);
+                            //移除成功的meet
+                            for (var i = 0; i < $scope.$parent.meets.length; i++) {
+                                if ($scope.$parent.meets[i]._id === data.meetId)
+                                {
+                                    $scope.$parent.meets.splice(i, 1);
+                                    break;
+                                }
+                            }
+                            $scope.$parent.showPopup('恭喜你!已加入好友列表,赶紧行动吧!');
+                        }).
+                        error($scope.$parent.ppError);
 
-        $ionicHistory.nextViewOptions({
-            disableAnimate: true,
-            disableBack: true,
-            historyRoot: true
-        });
-        $state.go('tab.meet');
-        $scope.modal.hide();
+                }
+                else
+                {
+                    $scope.$parent.showPopup('没猜对哦!');
+                }
+                $ionicHistory.nextViewOptions({
+                    disableAnimate: true,
+                    disableBack: true,
+                    historyRoot: true
+                });
+                $state.go('tab.meet');
+                $scope.modal.hide();
+
+            }
+            //searchMode = '回复' || '确认'
+            else
+            {
+                $scope.uploadMeet('待回复');
+            }
+        }
     }
 
     $scope.no = function(){
-        $ionicHistory.nextViewOptions({
-            disableAnimate: true,
-            disableBack: true,
-            historyRoot: true
-        });
-        $state.go('tab.meet');
-        $scope.modal.hide();
+        if ($scope.$parent.searchMode = '回复')
+        {
+            $ionicHistory.nextViewOptions({
+                disableAnimate: true,
+                disableBack: true,
+                historyRoot: true
+            });
+            $state.go('tab.meet');
+            $scope.modal.hide();
+        }
+        else{
+            $scope.uploadMeet('待确认');
+        }
     }
 
 });
 
-app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http, $ionicPopup) {
+app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http, $ionicPopup, $timeout) {
+    $scope.bLng = null;
+    $scope.bLat = null;
+
     $scope.searchTargets = function(){
         if (!(
             $scope.$parent.meetCondition.specialInfo.sex
@@ -510,11 +569,23 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
             return;
         }
 
-
+        var curLoc = window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null;
+        if (!curLoc)
+        {
+            $scope.$parent.showPopup('未能获取您的当前位置,请调整位置后重试');
+            return;
+        }
+        var lng = curLoc.lng;
+        var lat = curLoc.lat;
         $http.post(
                 $scope.$parent.serverRoot + 'searchTargets',
             {
-                meetCondition: $scope.$parent.meetCondition
+                username: $scope.$parent.user.username,
+                meetCondition: $scope.$parent.meetCondition,
+                sendLoc: {
+                    lng: curLoc.lng,
+                    lat: curLoc.lat
+                }
             }
         )
             .success(function(data, status, headers, config) {
@@ -539,15 +610,72 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
         }
     );
 
+    $scope.changeKeyword = function(keyword){
+        if ($scope.timer)
+        {
+            clearInterval($scope.timer);
+        }
+        $scope.timer = setInterval(function(){
+            if ($scope.timer)
+            {
+                clearInterval($scope.timer);
+            }
+            $scope.searchLoc(keyword);
+        }, 300);
+    }
+
+    $scope.searchLoc = function(keyword){
+        var ak = "F9266a6c6607e33fb7c3d8da0637ce0b";
+        var output = "json";
+        var radius = "2000";
+        var scope = "1";
+        var data = "query=" + encodeURIComponent(keyword);
+        data += "&ak=" + ak;
+        data += "&output=" + output;
+        data += "&radius=" + radius;
+        data += "&scope=" + scope;
+        data += "&location=" + $scope.bLat + "," + $scope.bLng;
+        data += "&filter=sort_name:distance";
+
+        $http.get("http://api.map.baidu.com/place/v2/search?" + data).
+            success(function(data, status, headers, config) {
+                //查询结果
+                $scope.$parent.curOptions = data.results;
+
+            }).
+            error($scope.$parent.ppError);
+    }
+
     $scope.clickInfoItem = function(item){
         if ($scope.$parent.searchMode == '确认')
         {
             return;
         }
+        if (item == '地点')
+        {
+            $scope.$parent.curOptions = [];
+            var curLoc = window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null;
+            if (!curLoc)
+            {
+                $scope.$parent.showPopup('未能获取您的当前位置,请调整位置后重试');
+                return;
+            }
+            var lng = curLoc.lng;
+            var lat = curLoc.lat;
+            $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + lng + "," + lat).
+                success(function(data, status, headers, config) {
+                    //转换为百度坐标
+                    $scope.bLng = data.result[0].x;
+                    $scope.bLat = data.result[0].y;
+                    $scope.$parent.curOptionName = item;
+
+                    $scope.modal.show();
+                }).
+                error($scope.$parent.ppError);
+            return;
+        }
+
         switch(item) {
-            case "地点":
-                $scope.$parent.curOptions = $scope.$parent.mapLocs;
-                break;
             case "性别":
                 $scope.$parent.curOptions = $scope.$parent.sex;
                 break;
@@ -603,6 +731,7 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
 });
 
 app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
+
     $http.get($scope.$parent.serverRoot + "getMeets?username=" + $scope.$parent.user.username).
         success(function(data, status, headers, config) {
             tmpArray = data.result.map(function(item){
@@ -612,8 +741,8 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
                     target : item.target,
                     mapLoc : item.mapLoc,
                     status : item.status,
-                    createTime: "t:" + item._id,
-                    specialInfo: item.specialInfo
+                    specialInfo: item.specialInfo,
+                    createTime: new Date( parseInt( item._id.toString().substring(0,8), 16 ) * 1000).toISOString()
                 };
 
                 var logo = null;
@@ -642,23 +771,36 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
         error($scope.$parent.ppError);
 
     $scope.createMeet = function(){
-        $scope.$parent.searchMode = '发起';
-        $scope.$parent.meetCondition = {
-            mapLoc: {
-                uid: '',
-                name: '',
-                address: ''
-            },
-            specialInfo: {
-                sex : '',
-                clothesColor : '',
-                clothesStyle : '',
-                clothesType : '',
-                glasses : '',
-                hair : ''
-            }
-        };
-        $state.go('tab.meet.condition');
+        $http.get($scope.$parent.serverRoot + "existInfo?username=" + $scope.$parent.user.username).
+            success(function(data, status, headers, config) {
+                if (data.result == 'yes')
+                {
+                    $scope.$parent.searchMode = '发起';
+                    $scope.$parent.meetCondition = {
+                        meetId: null,
+                        mapLoc: {
+                            uid: '',
+                            name: '',
+                            address: ''
+                        },
+                        specialInfo: {
+                            sex : '',
+                            clothesColor : '',
+                            clothesStyle : '',
+                            clothesType : '',
+                            glasses : '',
+                            hair : ''
+                        }
+                    };
+                    $state.go('tab.meet.condition');
+                }
+                else
+                {
+                    $scope.$parent.showPopup('请先完善特征信息!');
+                    $scope.enterInfo();
+                }
+            }).
+            error($scope.$parent.ppError);
     }
 
     $scope.enterInfo = function(){
@@ -667,7 +809,7 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
                 $scope.$parent.myInfo = data.result;
                 if ($scope.$parent.myInfo.specialPic)
                 {
-                    $scope.$parent.myInfo.specialPicDisplay = $scope.$parent.serverRoot + "images/middle/" + $scope.$parent.myInfo.specialPic;
+                    $scope.$parent.myInfo.specialPicDisplay = $scope.$parent.serverRoot + "images/normal/" + $scope.$parent.myInfo.specialPic;
                 }
 
                 $state.go('tab.meet.info');
@@ -688,13 +830,11 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
         }
     );
 
-    $scope.curMeet = null;
-
     $scope.clickMeet = function(meet){
         if (meet.status=='待确认')
         {
             ppCopyObj(meet, $scope.$parent.meetCondition);
-            console.log( $scope.$parent.meetCondition);
+            $scope.$parent.meetCondition.meetId = meet._id;
             $scope.$parent.searchMode = '确认';
 
             $state.go('tab.meet.condition');
@@ -719,7 +859,7 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
                         hair : ''
                     }
                 };
-                $scope.$parent.meet = meet;
+                $scope.$parent.curMeet = meet;
                 $state.go('tab.meet.condition');
             }
             else if (meet.creater.username == $scope.$parent.user.username)
@@ -763,7 +903,7 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
             {
                 username: $scope.$parent.user.username,
                 myInfo: $scope.$parent.myInfo,
-                latestLocation: window.localStorage['latestLocation'] ? packageJSON(window.localStorage['latestLocation']) : null
+                latestLocation: window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null
             }
         )
             .success(function(data, status, headers, config) {
@@ -871,25 +1011,27 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
             });
         }
         catch (err) {
-            //$scope.showPopup(err);
-            var options = {
-                fileKey: "avatar",
-                fileName: "image.png",
-                chunkedMode: false,
-                mimeType: "image/png"
-            };
-            $cordovaFile.uploadFile($scope.$parent.serverRoot + 'uploadSpecialPic', "/Users/pennsong/Desktop/a.jpg", options).then(function(result) {
-                console.log("SUCCESS: " + JSON.stringify(result.response));
-            }, function(err) {
-                console.log("ERROR: " + JSON.stringify(err));
-            }, function (progress) {
-                // constant progress updates
-            });
+            $scope.showPopup(err);
+            $scope.$parent.myInfo.specialPic = 'a.jpg';
+//            var options = {
+//                fileKey: "avatar",
+//                fileName: "image.png",
+//                chunkedMode: false,
+//                mimeType: "image/png"
+//            };
+//            $cordovaFile.uploadFile($scope.$parent.serverRoot + 'uploadSpecialPic', "/Users/pennsong/Desktop/a.jpg", options).then(function(result) {
+//                $scope.$parent.myInfo.specialPic = (JSON.parse(result.response))["result"];
+//                $scope.showPopup("SUCCESS: " + result.response);
+//            }, function(err) {
+//                console.log("ERROR: " + JSON.stringify(err));
+//            }, function (progress) {
+//                // constant progress updates
+//            });
         }
     }
 });
 
-app.controller('profileCtrl', function($scope, $state, $ionicHistory, $interval) {
+app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http) {
     $scope.mapLocs = [];
 
     $scope.logout = function(){
@@ -913,19 +1055,23 @@ app.controller('profileCtrl', function($scope, $state, $ionicHistory, $interval)
 //   the current GPS coordinates
 //
     function onSuccess(position) {
-//                var element = document.getElementById('geolocation');
-//                element.innerHTML = 'Latitude: '  + position.coords.latitude      + '<br />' +
-//                    'Longitude: ' + position.coords.longitude     + '<br />' +
-//                    '<hr />'      + element.innerHTML;
-        var d = new Date();
-        d = d.toLocaleTimeString().replace(/:\d+ /, ' ');
+
         var latestLocation = {
             lng: position.coords.longitude,
-            lat: position.coords.latitude,
-            time: d
+            lat: position.coords.latitude
         }
         window.localStorage['latestLocation'] = JSON.stringify(latestLocation);
-        $scope.mapLocs.unshift(window.localStorage['latestLocation']);
+        $http.put(
+                $scope.$parent.serverRoot + 'updateLocation',
+            {
+                username: $scope.$parent.user.username,
+                latestLocation: latestLocation
+            }
+        )
+            .success(function(data, status, headers, config) {
+                // this callback will be called asynchronously
+                console.log('update location succeed');
+            });
     }
 
 // onError Callback receives a PositionError object

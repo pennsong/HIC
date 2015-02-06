@@ -4,12 +4,12 @@
             <div class="row" ng-if="$even">
                 <div class="col">
                     <a href="#" ng-click="getBigPic(targets[$index].username, targets[$index].specialPic)">
-                        <img style="width: 120px" ng-src="{{imagePath + 'middle/' + targets[$index].specialPic}}">
+                        <img style="width: 120px" ng-src="{{imagePath + 'normal/' + targets[$index].specialPic}}">
                     </a>
                 </div>
-                <div class="col">
+                <div class="col" ng-if="targets[$index + 1]">
                     <a href="#" ng-click="getBigPic(targets[$index + 1].username, targets[$index + 1].specialPic)">
-                        <img style="width: 120px"  ng-src="{{imagePath + 'middle/' + targets[$index + 1].specialPic}}">
+                        <img style="width: 120px"  ng-src="{{imagePath + 'normal/' + targets[$index + 1].specialPic}}">
                     </a>
                 </div>
             </div>
