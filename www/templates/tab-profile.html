@@ -11,5 +11,11 @@
         </button>
             <div class="col">{{locationValErr}}</div>
             <div class="col" ng-repeat="item in locs track by $index">{{item}}</div>
+        <div class="item item-image">
+            <img src="http://api.map.baidu.com/staticimage?center={{latestLocation.lng}},{{latestLocation.lat}}&width=400&height=300&zoom=17&markers={{latestLocation.lng}},{{latestLocation.lat}}">
+        </div>
+        <div class="item item-image">
+            <img src="http://api.map.baidu.com/staticimage?center={{bLng}},{{bLat}}&width=400&height=300&zoom=17&markers={{bLng}},{{bLat}}">
+        </div>
     </ion-content>
 </ion-view>

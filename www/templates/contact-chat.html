@@ -1,4 +1,4 @@
-<ion-view view-title="对话{{friends[curChatFriendUsername].displayName}}">
+<ion-view view-title="对话{{friends[curChatFriendUsername].creater.username == user.username ? friends[curChatFriendUsername].target.nickname : friends[curChatFriendUsername].creater.nickname}}">
     <ion-content class="content-stable">
         <div ng-repeat="message in friends[curChatFriendUsername].messages"
              ng-class="{other: message.from != user.username}"

@@ -498,7 +498,6 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
                             // this callback will be called asynchronously
                             // when the response is available
                             $scope.$parent.friends.unshift(data.result);
-                            console.log($scope.$parent.meets);
                             //移除成功的meet
                             for (var i = 0; i < $scope.$parent.meets.length; i++) {
                                 if ($scope.$parent.meets[i]._id === data.meetId)
@@ -534,7 +533,7 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
     }
 
     $scope.no = function(){
-        if ($scope.$parent.searchMode = '回复')
+        if ($scope.$parent.searchMode == '回复')
         {
             $ionicHistory.nextViewOptions({
                 disableAnimate: true,
@@ -731,7 +730,6 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
 });
 
 app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
-
     $http.get($scope.$parent.serverRoot + "getMeets?username=" + $scope.$parent.user.username).
         success(function(data, status, headers, config) {
             tmpArray = data.result.map(function(item){
@@ -754,7 +752,7 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
                     }
                     else
                     {
-                        logo = $scope.$parent.imagePath + "small/" + item.target.specialPic;
+                        logo = $scope.$parent.imagePath + "normal/" + item.target.specialPic;
                     }
                 }
                 else
@@ -769,6 +767,52 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
             $scope.$parent.meets = tmpArray;
         }).
         error($scope.$parent.ppError);
+
+    $scope.doRefresh = function() {
+        $http.get($scope.$parent.serverRoot + "getMeets?username=" + $scope.$parent.user.username).
+            success(function(data, status, headers, config) {
+                tmpArray = data.result.map(function(item){
+                    var newItem = {
+                        _id : item._id,
+                        creater: item.creater,
+                        target : item.target,
+                        mapLoc : item.mapLoc,
+                        status : item.status,
+                        specialInfo: item.specialInfo,
+                        createTime: new Date( parseInt( item._id.toString().substring(0,8), 16 ) * 1000).toISOString()
+                    };
+
+                    var logo = null;
+                    if (item.creater.username == $scope.$parent.user.username)
+                    {
+                        if (item.status == '待确认')
+                        {
+                            logo = $scope.$parent.sysImagePath + "tbd.jpg";
+                        }
+                        else
+                        {
+                            logo = $scope.$parent.imagePath + "normal/" + item.target.specialPic;
+                        }
+                    }
+                    else
+                    {
+                        logo = $scope.$parent.sysImagePath + "x.jpg";
+                    }
+
+                    newItem.logo = logo;
+
+                    return newItem;
+                });
+                $scope.$parent.meets = tmpArray;
+            }).
+            error($scope.$parent.ppError).
+            finally(function() {
+                $scope.$broadcast('scroll.refreshComplete');
+                //$scope.$apply();
+            });
+    };
+
+
 
     $scope.createMeet = function(){
         $http.get($scope.$parent.serverRoot + "existInfo?username=" + $scope.$parent.user.username).
@@ -882,6 +926,18 @@ app.controller('contactCtrl', function($scope, $state, $http) {
         $scope.$parent.curChatFriendUsername = friendUsername;
         $state.go('tab.contact.chat');
     }
+
+    $scope.doRefresh = function() {
+        $http.get($scope.$parent.serverRoot + "getFriends?username=" + $scope.$parent.user.username).
+            success(function(data, status, headers, config) {
+                $scope.$parent.friends = data.result;
+            }).
+            error($scope.$parent.ppError)
+            .finally(function() {
+                $scope.$broadcast('scroll.refreshComplete')
+            });
+    };
+
 });
 
 app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCamera, $http, $cordovaFile) {
@@ -999,7 +1055,7 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
 
                 $cordovaFile.uploadFile($scope.$parent.serverRoot + 'uploadSpecialPic', fileURL, options).then(function(result) {
                     $scope.$parent.myInfo.specialPic = (JSON.parse(result.response))["result"];
-                    $scope.showPopup("SUCCESS: " + result.response);
+                    //$scope.showPopup("SUCCESS: " + result.response);
                 }, function(err) {
                     $scope.showPopup("ERROR: " + JSON.stringify(err));
                 }, function (progress) {
@@ -1032,6 +1088,8 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
 });
 
 app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http) {
+    $scope.latestLocation = window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null;
+
     $scope.mapLocs = [];
 
     $scope.logout = function(){
@@ -1055,23 +1113,30 @@ app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http) {
 //   the current GPS coordinates
 //
     function onSuccess(position) {
-
-        var latestLocation = {
+        $scope.latestLocation = {
             lng: position.coords.longitude,
             lat: position.coords.latitude
         }
-        window.localStorage['latestLocation'] = JSON.stringify(latestLocation);
-        $http.put(
-                $scope.$parent.serverRoot + 'updateLocation',
-            {
-                username: $scope.$parent.user.username,
-                latestLocation: latestLocation
-            }
-        )
-            .success(function(data, status, headers, config) {
-                // this callback will be called asynchronously
-                console.log('update location succeed');
-            });
+
+        $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $scope.latestLocation.lng + "," + $scope.latestLocation.lat).
+            success(function(data, status, headers, config) {
+                //转换为百度坐标
+                $scope.bLng = data.result[0].x;
+                $scope.bLat = data.result[0].y;
+                window.localStorage['latestLocation'] = JSON.stringify(latestLocation);
+                $http.put(
+                        $scope.$parent.serverRoot + 'updateLocation',
+                    {
+                        username: $scope.$parent.user.username,
+                        latestLocation: $scope.latestLocation
+                    }
+                )
+                    .success(function(data, status, headers, config) {
+                        // this callback will be called asynchronously
+                        console.log('update location succeed');
+                    });
+            }).
+            error($scope.$parent.ppError);
     }
 
 // onError Callback receives a PositionError object

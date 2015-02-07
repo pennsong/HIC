@@ -1,5 +1,7 @@
 <ion-view view-title="联系人">
     <ion-content>
+        <ion-refresher pulling-text="下拉刷新" on-refresh="doRefresh()">
+        </ion-refresher>
         <div class="list">
             <a class="item item-avatar-left" href="#" ng-repeat="(key, friend) in friends" ng-click="clickChat(key)">
                 <img ng-src="{{imagePath + 'normal/' + (friend.creater.username == user.username ? friend.target.specialPic : friend.creater.specialPic)}}">
