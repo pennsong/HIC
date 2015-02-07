@@ -181,6 +181,11 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
         cid: ''
     }
 
+    $scope.latestLocation = {
+        lng: null,
+        lat: null
+    }
+
     $scope.curMeet = null;
 
     $scope.showPopup = function(msg) {
@@ -213,8 +218,8 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
 
     $scope.searchMode;
 
-    //$scope.serverRoot = "http://192.168.1.6:3000/";
-    $scope.serverRoot = "http://10.0.1.5:3000/";
+    $scope.serverRoot = "http://192.168.1.6:3000/";
+    //$scope.serverRoot = "http://10.0.1.5:3000/";
     $scope.imagePath = $scope.serverRoot + 'images/';
     $scope.sysImagePath = $scope.serverRoot + 'images/system/';
 
@@ -533,7 +538,7 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
     }
 
     $scope.no = function(){
-        if ($scope.$parent.searchMode == '回复')
+        if ($scope.$parent.searchMode == '回复' || $scope.$parent.searchMode == '确认')
         {
             $ionicHistory.nextViewOptions({
                 disableAnimate: true,
@@ -567,23 +572,21 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
             $scope.$parent.showPopup('请把条件填写完整!');
             return;
         }
-
-        var curLoc = window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null;
-        if (!curLoc)
+        console.log($scope.$parent.latestLocation);
+        if (!($scope.$parent.latestLocation.lng && $scope.$parent.latestLocation.lat))
         {
             $scope.$parent.showPopup('未能获取您的当前位置,请调整位置后重试');
             return;
         }
-        var lng = curLoc.lng;
-        var lat = curLoc.lat;
+
         $http.post(
                 $scope.$parent.serverRoot + 'searchTargets',
             {
                 username: $scope.$parent.user.username,
                 meetCondition: $scope.$parent.meetCondition,
                 sendLoc: {
-                    lng: curLoc.lng,
-                    lat: curLoc.lat
+                    lng: $scope.$parent.latestLocation.lng,
+                    lat: $scope.$parent.latestLocation.lat
                 }
             }
         )
@@ -653,15 +656,12 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
         if (item == '地点')
         {
             $scope.$parent.curOptions = [];
-            var curLoc = window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null;
-            if (!curLoc)
+            if (!($scope.$parent.latestLocation.lng && $scope.$parent.latestLocation.lat))
             {
                 $scope.$parent.showPopup('未能获取您的当前位置,请调整位置后重试');
                 return;
             }
-            var lng = curLoc.lng;
-            var lat = curLoc.lat;
-            $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + lng + "," + lat).
+            $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $scope.$parent.latestLocation.lng + "," + $scope.$parent.latestLocation.lat).
                 success(function(data, status, headers, config) {
                     //转换为百度坐标
                     $scope.bLng = data.result[0].x;
@@ -1087,8 +1087,22 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
     }
 });
 
-app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http) {
-    $scope.latestLocation = window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null;
+app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http, $timeout, $ionicLoading) {
+
+    $scope.getCurMapPosition = function()
+    {
+        console.log($scope.$parent.latestLocation);
+        $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $scope.$parent.latestLocation.lng + "," + $scope.$parent.latestLocation.lat).
+            success(function(data, status, headers, config) {
+                //转换为百度坐标
+                $scope.bLng = data.result[0].x;
+                $scope.bLat = data.result[0].y;
+                var tmpDateTime = new Date();
+                $scope.mapUpdateTime = tmpDateTime.toLocaleDateString() + " " + tmpDateTime.toLocaleTimeString();
+
+            }).
+            error($scope.$parent.ppError);
+    }
 
     $scope.mapLocs = [];
 
@@ -1098,7 +1112,17 @@ app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http) {
             disableBack: true,
             historyRoot: true
         });
+
+        $ionicLoading.show({
+            template: '退出中...'
+        });
+
         $state.go('login');
+        $timeout(function() {
+            window.location.reload();
+            $ionicLoading.hide();
+        }, 300);
+
     }
 
     $scope.his = function(){
@@ -1113,30 +1137,26 @@ app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http) {
 //   the current GPS coordinates
 //
     function onSuccess(position) {
-        $scope.latestLocation = {
-            lng: position.coords.longitude,
-            lat: position.coords.latitude
-        }
 
-        $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $scope.latestLocation.lng + "," + $scope.latestLocation.lat).
-            success(function(data, status, headers, config) {
-                //转换为百度坐标
-                $scope.bLng = data.result[0].x;
-                $scope.bLat = data.result[0].y;
-                window.localStorage['latestLocation'] = JSON.stringify(latestLocation);
-                $http.put(
-                        $scope.$parent.serverRoot + 'updateLocation',
-                    {
-                        username: $scope.$parent.user.username,
-                        latestLocation: $scope.latestLocation
-                    }
-                )
-                    .success(function(data, status, headers, config) {
-                        // this callback will be called asynchronously
-                        console.log('update location succeed');
-                    });
-            }).
-            error($scope.$parent.ppError);
+        $scope.$parent.latestLocation.lng = position.coords.longitude;
+        $scope.$parent.latestLocation.lat = position.coords.latitude;
+
+//        $scope.$parent.latestLocation = {
+//            lng: position.coords.longitude,
+//            lat: position.coords.latitude
+//        }
+        window.localStorage['latestLocation'] = JSON.stringify($scope.$parent.latestLocation);
+        $http.put(
+                $scope.$parent.serverRoot + 'updateLocation',
+            {
+                username: $scope.$parent.user.username,
+                latestLocation: $scope.$parent.latestLocation
+            }
+        )
+            .success(function(data, status, headers, config) {
+                // this callback will be called asynchronously
+                console.log('update location succeed');
+            });
     }
 
 // onError Callback receives a PositionError object

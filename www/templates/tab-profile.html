@@ -6,16 +6,12 @@
         <button class="button button-full button-positive" ng-click="logout()">
             退出当前账号
         </button>
-        <button class="button button-full button-positive" ng-click="his()">
-            history
+        <button class="button button-full button-positive" ng-click="getCurMapPosition()">
+            查看最新位置信息
         </button>
-            <div class="col">{{locationValErr}}</div>
-            <div class="col" ng-repeat="item in locs track by $index">{{item}}</div>
-        <div class="item item-image">
-            <img src="http://api.map.baidu.com/staticimage?center={{latestLocation.lng}},{{latestLocation.lat}}&width=400&height=300&zoom=17&markers={{latestLocation.lng}},{{latestLocation.lat}}">
-        </div>
-        <div class="item item-image">
+        <div class="item item-image" ng-if="mapUpdateTime">
             <img src="http://api.map.baidu.com/staticimage?center={{bLng}},{{bLat}}&width=400&height=300&zoom=17&markers={{bLng}},{{bLat}}">
         </div>
+        更新时间: {{mapUpdateTime}}
     </ion-content>
 </ion-view>
