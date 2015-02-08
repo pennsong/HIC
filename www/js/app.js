@@ -167,13 +167,13 @@ app.directive('input', function($timeout){
     }
 });
 
-app.controller('baseCtrl', function($scope, $state, $ionicPopup){
-    $scope.user = {
+app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $rootScope){
+    $rootScope.user = {
         username: window.localStorage['username'] || '',
         password: ''
     }
 
-    $scope.newUser = {
+    $rootScope.newUser = {
         username: '',
         password: '',
         sex: '',
@@ -181,14 +181,14 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
         cid: ''
     }
 
-    $scope.latestLocation = {
+    $rootScope.latestLocation = {
         lng: null,
         lat: null
     }
 
-    $scope.curMeet = null;
+    $rootScope.curMeet = null;
 
-    $scope.showPopup = function(msg) {
+    $rootScope.showPopup = function(msg) {
         var alertPopup = $ionicPopup.alert({
             title: '注意',
             template: msg
@@ -197,43 +197,43 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
         });
     };
 
-    $scope.urlForImage = function(imageName) {
+    $rootScope.urlForImage = function(imageName) {
         var name = imageName.substr(imageName.lastIndexOf('/') + 1);
         var trueOrigin = cordova.file.tempDirectory + name;
         return trueOrigin;
     }
 
-    $scope.ppError = function(data, status, headers, config) {
+    $rootScope.ppError = function(data, status, headers, config) {
         // called asynchronously if an error occurs
         // or server returns response with an error status.
         if (status == 0)
         {
-            $scope.showPopup('网络不给力哦!'+ "(" + status + ")");
+            $rootScope.showPopup('网络不给力哦!'+ "(" + status + ")");
         }
         else
         {
-            $scope.showPopup(data.result + "(" + status + ")");
+            $rootScope.showPopup(data.result + "(" + status + ")");
         }
     }
 
-    $scope.searchMode;
+    $rootScope.searchMode;
 
-    $scope.serverRoot = "http://192.168.1.6:3000/";
-    //$scope.serverRoot = "http://10.0.1.5:3000/";
-    $scope.imagePath = $scope.serverRoot + 'images/';
-    $scope.sysImagePath = $scope.serverRoot + 'images/system/';
+    $rootScope.serverRoot = "http://192.168.1.6:3000/";
+    //$rootScope.serverRoot = "http://10.0.1.5:3000/";
+    $rootScope.imagePath = $rootScope.serverRoot + 'images/';
+    $rootScope.sysImagePath = $rootScope.serverRoot + 'images/system/';
 
-    $scope.curOptions = [];
-    $scope.curOptionName = "";
+    $rootScope.curOptions = [];
+    $rootScope.curOptionName = "";
 
-    $scope.curChatFriendUsername;
+    $rootScope.curChatFriendUsername;
 
-    $scope.myLocation = {
+    $rootScope.myLocation = {
         lng: 0,
         lat: 0
     }
 
-    $scope.myInfo = {
+    $rootScope.myInfo = {
         "specialInfo" : {
             "sex" : null,
             "clothesColor" : null,
@@ -246,7 +246,7 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
         specialPicDisplay: null
     }
 
-    $scope.meetCondition = {
+    $rootScope.meetCondition = {
         meetId: null,
         mapLoc: {
             uid: '',
@@ -263,21 +263,21 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
         }
     };
 
-    $scope.meets = [];
+    $rootScope.meets = [];
 
-    $scope.friends = [];
+    $rootScope.friends = [];
 
-    $scope.targets = [];
+    $rootScope.targets = [];
 
-    $scope.mapLocs = [
+    $rootScope.mapLocs = [
     ];
 
-    $scope.sex = [
+    $rootScope.sex = [
         "男",
         "女"
     ];
 
-    $scope.hair = [
+    $rootScope.hair = [
         "竖起",
         "躺下",
         "辫子/盘发",
@@ -286,12 +286,12 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
         "戴帽子"
     ];
 
-    $scope.glasses = [
+    $rootScope.glasses = [
         "带",
         "不带"
     ];
 
-    $scope.clothesType = [
+    $rootScope.clothesType = [
         "风衣/大衣",
         "西装/夹克/套装",
         "运动外套/卫衣",
@@ -303,7 +303,7 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
         "毛衣/羊毛绒/线衫/针织"
     ];
 
-    $scope.clothesColor = [
+    $rootScope.clothesColor = [
         "红/紫/粉",
         "黄",
         "蓝/绿",
@@ -313,17 +313,17 @@ app.controller('baseCtrl', function($scope, $state, $ionicPopup){
         "无法分辨主要颜色"
     ];
 
-    $scope.clothesStyle = [
+    $rootScope.clothesStyle = [
         "纯色",
         "线条/格子/色块",
         "图案(抽象,卡通,画等)"
     ];
 });
 
-app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup, $cordovaDevice) {
+app.controller('loginCtrl', function($scope, $rootScope, $state, $http, $ionicPopup, $cordovaDevice) {
 
     $scope.goRegister = function(){
-        $scope.$parent.newUser = {
+        $rootScope.newUser = {
             username: '',
             password: '',
             sex: '',
@@ -337,11 +337,11 @@ app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup, $cordov
     $scope.login = function(user){
         if (!user.username || !user.password)
         {
-            $scope.$parent.showPopup('用户名和密码都不能为空!');
+            $rootScope.showPopup('用户名和密码都不能为空!');
             return;
         }
         $http.post(
-                $scope.$parent.serverRoot + 'login',
+                $rootScope.serverRoot + 'login',
             {
                 username: user.username,
                 password: user.password,
@@ -351,24 +351,24 @@ app.controller('loginCtrl', function($scope, $state, $http, $ionicPopup, $cordov
             .success(function(data, status, headers, config) {
                 // this callback will be called asynchronously
                 // when the response is available
-                $scope.$parent.user.username = data.result;
+                $rootScope.user.username = data.result;
                 window.localStorage['username'] = data.result;
                 $state.go("tab.meet")
             }).
-            error($scope.$parent.ppError);
+            error($rootScope.ppError);
     }
 });
 
-app.controller('registerCtrl', function($scope, $state, $http, $ionicPopup, $cordovaDevice) {
+app.controller('registerCtrl', function($scope, $rootScope, $state, $http, $ionicPopup, $cordovaDevice) {
     $scope.register = function(newUser){
         newUser.cid = 't2';//$cordovaDevice.getUUID();
         if (!(newUser.username && newUser.password && newUser.sex && newUser.nickname && newUser.cid))
         {
-            $scope.$parent.showPopup('用户名, 密码, 性别, 昵称都不能为空!');
+            $rootScope.showPopup('用户名, 密码, 性别, 昵称都不能为空!');
             return;
         }
         $http.post(
-                $scope.$parent.serverRoot + 'register',
+                $rootScope.serverRoot + 'register',
             {
                 newUser: newUser
             }
@@ -376,18 +376,18 @@ app.controller('registerCtrl', function($scope, $state, $http, $ionicPopup, $cor
             .success(function(data, status, headers, config) {
                 // this callback will be called asynchronously
                 // when the response is available
-                $scope.$parent.user.username = data.result;
+                $rootScope.user.username = data.result;
                 window.localStorage['username'] = data.result;
                 $state.go("tab.meet")
             }).
-            error($scope.$parent.ppError);
+            error($rootScope.ppError);
     }
 });
 
-app.controller('meetDetailCtrl', function($scope, $state) {
+app.controller('meetDetailCtrl', function($scope, $rootScope, $state) {
 });
 
-app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $ionicHistory, $http) {
+app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ionicModal, $ionicHistory, $http) {
     $ionicModal.fromTemplateUrl(
         'templates/bigSpecialPic.html',
         function($ionicModal) {
@@ -414,14 +414,14 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
             targetUsername = $scope.targetUsername
         }
         $http.post(
-                $scope.$parent.serverRoot + 'createMeet',
+                $rootScope.serverRoot + 'createMeet',
             {
-                creater_username: $scope.$parent.user.username,
+                creater_username: $rootScope.user.username,
                 target_username: targetUsername,
                 status: status,
-                meetId: $scope.$parent.meetCondition.meetId,
-                mapLoc: $scope.$parent.meetCondition.mapLoc,
-                specialInfo: $scope.$parent.meetCondition.specialInfo,
+                meetId: $rootScope.meetCondition.meetId,
+                mapLoc: $rootScope.meetCondition.mapLoc,
+                specialInfo: $rootScope.meetCondition.specialInfo,
                 personLoc: window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null
             }
         )
@@ -435,32 +435,32 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
                 {
                     if (newItem.status == '待确认')
                     {
-                        logo = $scope.$parent.sysImagePath + "tbd.jpg";
+                        logo = $rootScope.sysImagePath + "tbd.jpg";
                     }
                     else
                     {
-                        logo = $scope.$parent.imagePath + "normal/" + newItem.target.specialPic;
+                        logo = $rootScope.imagePath + "normal/" + newItem.target.specialPic;
                     }
                 }
                 else
                 {
-                    logo = $scope.$parent.sysImagePath + "x.jpg";
+                    logo = $rootScope.sysImagePath + "x.jpg";
                 }
 
                 newItem.logo = logo;
 
                 var updateMeet = false;
-                for (var i = 0; i < $scope.$parent.meets.length; i++) {
-                    if ($scope.$parent.meets[i]._id === newItem._id)
+                for (var i = 0; i < $rootScope.meets.length; i++) {
+                    if ($rootScope.meets[i]._id === newItem._id)
                     {
-                        $scope.$parent.meets[i] = newItem;
+                        $rootScope.meets[i] = newItem;
                         updateMeet = true;
                         break;
                     }
                 }
                 if (!updateMeet)
                 {
-                    $scope.$parent.meets.unshift(newItem);
+                    $rootScope.meets.unshift(newItem);
                 }
                 $ionicHistory.nextViewOptions({
                     disableAnimate: true,
@@ -470,13 +470,13 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
                 $state.go('tab.meet');
                 $scope.modal.hide();
             }).
-            error($scope.$parent.ppError);
+            error($rootScope.ppError);
     }
 
     $scope.yes = function(targetUsername){
         if (targetUsername == 'fake')
         {
-            $scope.$parent.showPopup('请仔细选择图片!');
+            $rootScope.showPopup('请仔细选择图片!');
             $ionicHistory.nextViewOptions({
                 disableAnimate: true,
                 disableBack: true,
@@ -487,38 +487,38 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
         }
         else
         {
-            if ($scope.$parent.searchMode == '回复')
+            if ($rootScope.searchMode == '回复')
             {
-                if ($scope.$parent.curMeet.creater.username == targetUsername)
+                if ($rootScope.curMeet.creater.username == targetUsername)
                 {
                     $http.post(
-                            $scope.$parent.serverRoot + 'replySuccess',
+                            $rootScope.serverRoot + 'replySuccess',
                         {
                             creater_username: targetUsername,
-                            target_username: $scope.$parent.user.username,
-                            meetId: $scope.$parent.curMeet._id
+                            target_username: $rootScope.user.username,
+                            meetId: $rootScope.curMeet._id
                         }
                     )
                         .success(function(data, status, headers, config) {
                             // this callback will be called asynchronously
                             // when the response is available
-                            $scope.$parent.friends.unshift(data.result);
+                            $rootScope.friends.unshift(data.result);
                             //移除成功的meet
-                            for (var i = 0; i < $scope.$parent.meets.length; i++) {
-                                if ($scope.$parent.meets[i]._id === data.meetId)
+                            for (var i = 0; i < $rootScope.meets.length; i++) {
+                                if ($rootScope.meets[i]._id === data.meetId)
                                 {
-                                    $scope.$parent.meets.splice(i, 1);
+                                    $rootScope.meets.splice(i, 1);
                                     break;
                                 }
                             }
-                            $scope.$parent.showPopup('恭喜你!已加入好友列表,赶紧行动吧!');
+                            $rootScope.showPopup('恭喜你!已加入好友列表,赶紧行动吧!');
                         }).
-                        error($scope.$parent.ppError);
+                        error($rootScope.ppError);
 
                 }
                 else
                 {
-                    $scope.$parent.showPopup('没猜对哦!');
+                    $rootScope.showPopup('没猜对哦!');
                 }
                 $ionicHistory.nextViewOptions({
                     disableAnimate: true,
@@ -538,7 +538,7 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
     }
 
     $scope.no = function(){
-        if ($scope.$parent.searchMode == '回复' || $scope.$parent.searchMode == '确认')
+        if ($rootScope.searchMode == '回复' || $rootScope.searchMode == '确认')
         {
             $ionicHistory.nextViewOptions({
                 disableAnimate: true,
@@ -555,48 +555,47 @@ app.controller('conditionSpecialCtrl', function($scope, $state, $ionicModal, $io
 
 });
 
-app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http, $ionicPopup, $timeout) {
+app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicModal, $http, $ionicPopup, $timeout) {
     $scope.bLng = null;
     $scope.bLat = null;
 
     $scope.searchTargets = function(){
         if (!(
-            $scope.$parent.meetCondition.specialInfo.sex
-            && $scope.$parent.meetCondition.specialInfo.clothesColor
-            && $scope.$parent.meetCondition.specialInfo.clothesStyle
-            && $scope.$parent.meetCondition.specialInfo.clothesType
-            && $scope.$parent.meetCondition.specialInfo.glasses
-            && $scope.$parent.meetCondition.specialInfo.hair
-            && $scope.$parent.meetCondition.mapLoc
+            $rootScope.meetCondition.specialInfo.sex
+            && $rootScope.meetCondition.specialInfo.clothesColor
+            && $rootScope.meetCondition.specialInfo.clothesStyle
+            && $rootScope.meetCondition.specialInfo.clothesType
+            && $rootScope.meetCondition.specialInfo.glasses
+            && $rootScope.meetCondition.specialInfo.hair
+            && $rootScope.meetCondition.mapLoc
             )){
-            $scope.$parent.showPopup('请把条件填写完整!');
+            $rootScope.showPopup('请把条件填写完整!');
             return;
         }
-        console.log($scope.$parent.latestLocation);
-        if (!($scope.$parent.latestLocation.lng && $scope.$parent.latestLocation.lat))
+        if (!($rootScope.latestLocation.lng && $rootScope.latestLocation.lat))
         {
-            $scope.$parent.showPopup('未能获取您的当前位置,请调整位置后重试');
+            $rootScope.showPopup('未能获取您的当前位置,请调整位置后重试');
             return;
         }
 
         $http.post(
-                $scope.$parent.serverRoot + 'searchTargets',
+                $rootScope.serverRoot + 'searchTargets',
             {
-                username: $scope.$parent.user.username,
-                meetCondition: $scope.$parent.meetCondition,
+                username: $rootScope.user.username,
+                meetCondition: $rootScope.meetCondition,
                 sendLoc: {
-                    lng: $scope.$parent.latestLocation.lng,
-                    lat: $scope.$parent.latestLocation.lat
+                    lng: $rootScope.latestLocation.lng,
+                    lat: $rootScope.latestLocation.lat
                 }
             }
         )
             .success(function(data, status, headers, config) {
                 // this callback will be called asynchronously
                 // when the response is available
-                $scope.$parent.targets = data.result;
+                $rootScope.targets = data.result;
                 $state.go('tab.meet.condition.specialPic');
             }).
-            error($scope.$parent.ppError);
+            error($rootScope.ppError);
     }
 
     $ionicModal.fromTemplateUrl(
@@ -642,85 +641,85 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
         $http.get("http://api.map.baidu.com/place/v2/search?" + data).
             success(function(data, status, headers, config) {
                 //查询结果
-                $scope.$parent.curOptions = data.results;
+                $rootScope.curOptions = data.results;
 
             }).
-            error($scope.$parent.ppError);
+            error($rootScope.ppError);
     }
 
     $scope.clickInfoItem = function(item){
-        if ($scope.$parent.searchMode == '确认')
+        if ($rootScope.searchMode == '确认')
         {
             return;
         }
         if (item == '地点')
         {
-            $scope.$parent.curOptions = [];
-            if (!($scope.$parent.latestLocation.lng && $scope.$parent.latestLocation.lat))
+            $rootScope.curOptions = [];
+            if (!($rootScope.latestLocation.lng && $rootScope.latestLocation.lat))
             {
-                $scope.$parent.showPopup('未能获取您的当前位置,请调整位置后重试');
+                $rootScope.showPopup('未能获取您的当前位置,请调整位置后重试');
                 return;
             }
-            $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $scope.$parent.latestLocation.lng + "," + $scope.$parent.latestLocation.lat).
+            $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.latestLocation.lng + "," + $rootScope.latestLocation.lat).
                 success(function(data, status, headers, config) {
                     //转换为百度坐标
                     $scope.bLng = data.result[0].x;
                     $scope.bLat = data.result[0].y;
-                    $scope.$parent.curOptionName = item;
+                    $rootScope.curOptionName = item;
 
                     $scope.modal.show();
                 }).
-                error($scope.$parent.ppError);
+                error($rootScope.ppError);
             return;
         }
 
         switch(item) {
             case "性别":
-                $scope.$parent.curOptions = $scope.$parent.sex;
+                $rootScope.curOptions = $rootScope.sex;
                 break;
             case "发型":
-                $scope.$parent.curOptions = $scope.$parent.hair;
+                $rootScope.curOptions = $rootScope.hair;
                 break;
             case "眼镜":
-                $scope.$parent.curOptions = $scope.$parent.glasses;
+                $rootScope.curOptions = $rootScope.glasses;
                 break;
             case "衣服类型":
-                $scope.$parent.curOptions = $scope.$parent.clothesType;
+                $rootScope.curOptions = $rootScope.clothesType;
                 break;
             case "衣服颜色":
-                $scope.$parent.curOptions = $scope.$parent.clothesColor;
+                $rootScope.curOptions = $rootScope.clothesColor;
                 break;
             case "衣服花纹":
-                $scope.$parent.curOptions = $scope.$parent.clothesStyle;
+                $rootScope.curOptions = $rootScope.clothesStyle;
                 break;
             default:
         }
-        $scope.$parent.curOptionName = item;
+        $rootScope.curOptionName = item;
         $scope.modal.show();
     }
 
     $scope.clickItem = function(item){
-        switch($scope.$parent.curOptionName) {
+        switch($rootScope.curOptionName) {
             case "地点":
-                $scope.$parent.meetCondition.mapLoc = item;
+                $rootScope.meetCondition.mapLoc = item;
                 break;
             case "性别":
-                $scope.$parent.meetCondition.specialInfo.sex = item;
+                $rootScope.meetCondition.specialInfo.sex = item;
                 break;
             case "发型":
-                $scope.$parent.meetCondition.specialInfo.hair = item;
+                $rootScope.meetCondition.specialInfo.hair = item;
                 break;
             case "眼镜":
-                $scope.$parent.meetCondition.specialInfo.glasses = item;
+                $rootScope.meetCondition.specialInfo.glasses = item;
                 break;
             case "衣服类型":
-                $scope.$parent.meetCondition.specialInfo.clothesType = item;
+                $rootScope.meetCondition.specialInfo.clothesType = item;
                 break;
             case "衣服颜色":
-                $scope.$parent.meetCondition.specialInfo.clothesColor = item;
+                $rootScope.meetCondition.specialInfo.clothesColor = item;
                 break;
             case "衣服花纹":
-                $scope.$parent.meetCondition.specialInfo.clothesStyle = item;
+                $rootScope.meetCondition.specialInfo.clothesStyle = item;
                 break;
             default:
 
@@ -729,8 +728,8 @@ app.controller('meetConditionCtrl', function($scope, $state, $ionicModal, $http,
     }
 });
 
-app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
-    $http.get($scope.$parent.serverRoot + "getMeets?username=" + $scope.$parent.user.username).
+app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $http) {
+    $http.get($rootScope.serverRoot + "getMeets?username=" + $rootScope.user.username).
         success(function(data, status, headers, config) {
             tmpArray = data.result.map(function(item){
                 var newItem = {
@@ -744,32 +743,32 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
                 };
 
                 var logo = null;
-                if (item.creater.username == $scope.$parent.user.username)
+                if (item.creater.username == $rootScope.user.username)
                 {
                     if (item.status == '待确认')
                     {
-                        logo = $scope.$parent.sysImagePath + "tbd.jpg";
+                        logo = $rootScope.sysImagePath + "tbd.jpg";
                     }
                     else
                     {
-                        logo = $scope.$parent.imagePath + "normal/" + item.target.specialPic;
+                        logo = $rootScope.imagePath + "normal/" + item.target.specialPic;
                     }
                 }
                 else
                 {
-                    logo = $scope.$parent.sysImagePath + "x.jpg";
+                    logo = $rootScope.sysImagePath + "x.jpg";
                 }
 
                 newItem.logo = logo;
 
                 return newItem;
             });
-            $scope.$parent.meets = tmpArray;
+            $rootScope.meets = tmpArray;
         }).
-        error($scope.$parent.ppError);
+        error($rootScope.ppError);
 
     $scope.doRefresh = function() {
-        $http.get($scope.$parent.serverRoot + "getMeets?username=" + $scope.$parent.user.username).
+        $http.get($rootScope.serverRoot + "getMeets?username=" + $rootScope.user.username).
             success(function(data, status, headers, config) {
                 tmpArray = data.result.map(function(item){
                     var newItem = {
@@ -783,29 +782,29 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
                     };
 
                     var logo = null;
-                    if (item.creater.username == $scope.$parent.user.username)
+                    if (item.creater.username == $rootScope.user.username)
                     {
                         if (item.status == '待确认')
                         {
-                            logo = $scope.$parent.sysImagePath + "tbd.jpg";
+                            logo = $rootScope.sysImagePath + "tbd.jpg";
                         }
                         else
                         {
-                            logo = $scope.$parent.imagePath + "normal/" + item.target.specialPic;
+                            logo = $rootScope.imagePath + "normal/" + item.target.specialPic;
                         }
                     }
                     else
                     {
-                        logo = $scope.$parent.sysImagePath + "x.jpg";
+                        logo = $rootScope.sysImagePath + "x.jpg";
                     }
 
                     newItem.logo = logo;
 
                     return newItem;
                 });
-                $scope.$parent.meets = tmpArray;
+                $rootScope.meets = tmpArray;
             }).
-            error($scope.$parent.ppError).
+            error($rootScope.ppError).
             finally(function() {
                 $scope.$broadcast('scroll.refreshComplete');
                 //$scope.$apply();
@@ -815,12 +814,12 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
 
 
     $scope.createMeet = function(){
-        $http.get($scope.$parent.serverRoot + "existInfo?username=" + $scope.$parent.user.username).
+        $http.get($rootScope.serverRoot + "existInfo?username=" + $rootScope.user.username).
             success(function(data, status, headers, config) {
                 if (data.result == 'yes')
                 {
-                    $scope.$parent.searchMode = '发起';
-                    $scope.$parent.meetCondition = {
+                    $rootScope.searchMode = '发起';
+                    $rootScope.meetCondition = {
                         meetId: null,
                         mapLoc: {
                             uid: '',
@@ -840,25 +839,25 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
                 }
                 else
                 {
-                    $scope.$parent.showPopup('请先完善特征信息!');
+                    $rootScope.showPopup('请先完善特征信息!');
                     $scope.enterInfo();
                 }
             }).
-            error($scope.$parent.ppError);
+            error($rootScope.ppError);
     }
 
     $scope.enterInfo = function(){
-        $http.get($scope.$parent.serverRoot + "getInfo?username=" + $scope.$parent.user.username).
+        $http.get($rootScope.serverRoot + "getInfo?username=" + $rootScope.user.username).
             success(function(data, status, headers, config) {
-                $scope.$parent.myInfo = data.result;
-                if ($scope.$parent.myInfo.specialPic)
+                $rootScope.myInfo = data.result;
+                if ($rootScope.myInfo.specialPic)
                 {
-                    $scope.$parent.myInfo.specialPicDisplay = $scope.$parent.serverRoot + "images/normal/" + $scope.$parent.myInfo.specialPic;
+                    $rootScope.myInfo.specialPicDisplay = $rootScope.serverRoot + "images/normal/" + $rootScope.myInfo.specialPic;
                 }
 
                 $state.go('tab.meet.info');
             }).
-            error($scope.$parent.ppError);
+            error($rootScope.ppError);
     }
 
     $ionicModal.fromTemplateUrl(
@@ -877,18 +876,18 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
     $scope.clickMeet = function(meet){
         if (meet.status=='待确认')
         {
-            ppCopyObj(meet, $scope.$parent.meetCondition);
-            $scope.$parent.meetCondition.meetId = meet._id;
-            $scope.$parent.searchMode = '确认';
+            ppCopyObj(meet, $rootScope.meetCondition);
+            $rootScope.meetCondition.meetId = meet._id;
+            $rootScope.searchMode = '确认';
 
             $state.go('tab.meet.condition');
         }
         else if (meet.status == '待回复')
         {
-            if (meet.target.username == $scope.$parent.user.username)
+            if (meet.target.username == $rootScope.user.username)
             {
-                $scope.$parent.searchMode = '回复';
-                $scope.$parent.meetCondition = {
+                $rootScope.searchMode = '回复';
+                $rootScope.meetCondition = {
                     mapLoc: {
                         uid: '',
                         name: '',
@@ -903,36 +902,36 @@ app.controller('meetCtrl', function($scope, $state, $ionicModal, $http) {
                         hair : ''
                     }
                 };
-                $scope.$parent.curMeet = meet;
+                $rootScope.curMeet = meet;
                 $state.go('tab.meet.condition');
             }
-            else if (meet.creater.username == $scope.$parent.user.username)
+            else if (meet.creater.username == $rootScope.user.username)
             {
-                $scope.$parent.curMeet = meet;
+                $rootScope.curMeet = meet;
                 $scope.modal.show();
             }
         }
     }
 });
 
-app.controller('contactCtrl', function($scope, $state, $http) {
-    $http.get($scope.$parent.serverRoot + "getFriends?username=" + $scope.$parent.user.username).
+app.controller('contactCtrl', function($scope, $rootScope, $state, $http) {
+    $http.get($rootScope.serverRoot + "getFriends?username=" + $rootScope.user.username).
         success(function(data, status, headers, config) {
-            $scope.$parent.friends = data.result;
+            $rootScope.friends = data.result;
         }).
-        error($scope.$parent.ppError);
+        error($rootScope.ppError);
 
     $scope.clickChat = function(friendUsername){
-        $scope.$parent.curChatFriendUsername = friendUsername;
+        $rootScope.curChatFriendUsername = friendUsername;
         $state.go('tab.contact.chat');
     }
 
     $scope.doRefresh = function() {
-        $http.get($scope.$parent.serverRoot + "getFriends?username=" + $scope.$parent.user.username).
+        $http.get($rootScope.serverRoot + "getFriends?username=" + $rootScope.user.username).
             success(function(data, status, headers, config) {
-                $scope.$parent.friends = data.result;
+                $rootScope.friends = data.result;
             }).
-            error($scope.$parent.ppError)
+            error($rootScope.ppError)
             .finally(function() {
                 $scope.$broadcast('scroll.refreshComplete')
             });
@@ -940,25 +939,25 @@ app.controller('contactCtrl', function($scope, $state, $http) {
 
 });
 
-app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCamera, $http, $cordovaFile) {
+app.controller('meetInfoCtrl', function($scope, $rootScope, $state, $ionicModal, $cordovaCamera, $http, $cordovaFile) {
     $scope.myGoBack = function() {
         if (!(
-            $scope.$parent.myInfo.specialInfo.sex
-            && $scope.$parent.myInfo.specialInfo.clothesColor
-            && $scope.$parent.myInfo.specialInfo.clothesStyle
-            && $scope.$parent.myInfo.specialInfo.clothesType
-            && $scope.$parent.myInfo.specialInfo.glasses
-            && $scope.$parent.myInfo.specialInfo.hair
-            && $scope.$parent.myInfo.specialPic
+            $rootScope.myInfo.specialInfo.sex
+            && $rootScope.myInfo.specialInfo.clothesColor
+            && $rootScope.myInfo.specialInfo.clothesStyle
+            && $rootScope.myInfo.specialInfo.clothesType
+            && $rootScope.myInfo.specialInfo.glasses
+            && $rootScope.myInfo.specialInfo.hair
+            && $rootScope.myInfo.specialPic
             )){
-            $scope.$parent.showPopup('请填写完整!');
+            $rootScope.showPopup('请填写完整!');
             return;
         }
         $http.post(
-                $scope.$parent.serverRoot + 'updateInfo',
+                $rootScope.serverRoot + 'updateInfo',
             {
-                username: $scope.$parent.user.username,
-                myInfo: $scope.$parent.myInfo,
+                username: $rootScope.user.username,
+                myInfo: $rootScope.myInfo,
                 latestLocation: window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null
             }
         )
@@ -967,7 +966,7 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
                 // when the response is available
                 $state.go('tab.meet');
             }).
-            error($scope.$parent.ppError);
+            error($rootScope.ppError);
     };
 
     $ionicModal.fromTemplateUrl(
@@ -986,42 +985,42 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
     $scope.clickInfoItem = function(item){
         switch(item) {
             case "发型":
-                $scope.$parent.curOptions = $scope.$parent.hair;
+                $rootScope.curOptions = $rootScope.hair;
                 break;
             case "眼镜":
-                $scope.$parent.curOptions = $scope.$parent.glasses;
+                $rootScope.curOptions = $rootScope.glasses;
                 break;
             case "衣服类型":
-                $scope.$parent.curOptions = $scope.$parent.clothesType;
+                $rootScope.curOptions = $rootScope.clothesType;
                 break;
             case "衣服颜色":
-                $scope.$parent.curOptions = $scope.$parent.clothesColor;
+                $rootScope.curOptions = $rootScope.clothesColor;
                 break;
             case "衣服花纹":
-                $scope.$parent.curOptions = $scope.$parent.clothesStyle;
+                $rootScope.curOptions = $rootScope.clothesStyle;
                 break;
             default:
         }
-        $scope.$parent.curOptionName = item;
+        $rootScope.curOptionName = item;
         $scope.modal.show();
     }
 
     $scope.clickItem = function(item){
-        switch($scope.$parent.curOptionName) {
+        switch($rootScope.curOptionName) {
             case "发型":
-                $scope.$parent.myInfo.specialInfo.hair = item;
+                $rootScope.myInfo.specialInfo.hair = item;
                 break;
             case "眼镜":
-                $scope.$parent.myInfo.specialInfo.glasses = item;
+                $rootScope.myInfo.specialInfo.glasses = item;
                 break;
             case "衣服类型":
-                $scope.$parent.myInfo.specialInfo.clothesType = item;
+                $rootScope.myInfo.specialInfo.clothesType = item;
                 break;
             case "衣服颜色":
-                $scope.$parent.myInfo.specialInfo.clothesColor = item;
+                $rootScope.myInfo.specialInfo.clothesColor = item;
                 break;
             case "衣服花纹":
-                $scope.$parent.myInfo.specialInfo.clothesStyle = item;
+                $rootScope.myInfo.specialInfo.clothesStyle = item;
                 break;
             default:
 
@@ -1044,7 +1043,7 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
             };
 
             $cordovaCamera.getPicture(options).then(function(fileURL) {
-                $scope.$parent.myInfo.specialPicDisplay = fileURL;
+                $rootScope.myInfo.specialPicDisplay = fileURL;
 
                 var options = {
                     fileKey: "avatar",
@@ -1053,8 +1052,8 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
                     mimeType: "image/png"
                 };
 
-                $cordovaFile.uploadFile($scope.$parent.serverRoot + 'uploadSpecialPic', fileURL, options).then(function(result) {
-                    $scope.$parent.myInfo.specialPic = (JSON.parse(result.response))["result"];
+                $cordovaFile.uploadFile($rootScope.serverRoot + 'uploadSpecialPic', fileURL, options).then(function(result) {
+                    $rootScope.myInfo.specialPic = (JSON.parse(result.response))["result"];
                     //$scope.showPopup("SUCCESS: " + result.response);
                 }, function(err) {
                     $scope.showPopup("ERROR: " + JSON.stringify(err));
@@ -1068,15 +1067,15 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
         }
         catch (err) {
             $scope.showPopup(err);
-            $scope.$parent.myInfo.specialPic = 'a.jpg';
+            $rootScope.myInfo.specialPic = 'a.jpg';
 //            var options = {
 //                fileKey: "avatar",
 //                fileName: "image.png",
 //                chunkedMode: false,
 //                mimeType: "image/png"
 //            };
-//            $cordovaFile.uploadFile($scope.$parent.serverRoot + 'uploadSpecialPic', "/Users/pennsong/Desktop/a.jpg", options).then(function(result) {
-//                $scope.$parent.myInfo.specialPic = (JSON.parse(result.response))["result"];
+//            $cordovaFile.uploadFile($rootScope.serverRoot + 'uploadSpecialPic', "/Users/pennsong/Desktop/a.jpg", options).then(function(result) {
+//                $rootScope.myInfo.specialPic = (JSON.parse(result.response))["result"];
 //                $scope.showPopup("SUCCESS: " + result.response);
 //            }, function(err) {
 //                console.log("ERROR: " + JSON.stringify(err));
@@ -1087,12 +1086,11 @@ app.controller('meetInfoCtrl', function($scope, $state, $ionicModal, $cordovaCam
     }
 });
 
-app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http, $timeout, $ionicLoading) {
+app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory, $http, $timeout, $ionicLoading) {
 
     $scope.getCurMapPosition = function()
     {
-        console.log($scope.$parent.latestLocation);
-        $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $scope.$parent.latestLocation.lng + "," + $scope.$parent.latestLocation.lat).
+        $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.latestLocation.lng + "," + $rootScope.latestLocation.lat).
             success(function(data, status, headers, config) {
                 //转换为百度坐标
                 $scope.bLng = data.result[0].x;
@@ -1101,7 +1099,7 @@ app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http, $ti
                 $scope.mapUpdateTime = tmpDateTime.toLocaleDateString() + " " + tmpDateTime.toLocaleTimeString();
 
             }).
-            error($scope.$parent.ppError);
+            error($rootScope.ppError);
     }
 
     $scope.mapLocs = [];
@@ -1138,19 +1136,19 @@ app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http, $ti
 //
     function onSuccess(position) {
 
-        $scope.$parent.latestLocation.lng = position.coords.longitude;
-        $scope.$parent.latestLocation.lat = position.coords.latitude;
+//        $rootScope.latestLocation.lng = position.coords.longitude;
+//        $rootScope.latestLocation.lat = position.coords.latitude;
 
-//        $scope.$parent.latestLocation = {
-//            lng: position.coords.longitude,
-//            lat: position.coords.latitude
-//        }
-        window.localStorage['latestLocation'] = JSON.stringify($scope.$parent.latestLocation);
+        $rootScope.latestLocation = {
+            lng: position.coords.longitude,
+            lat: position.coords.latitude
+        }
+        window.localStorage['latestLocation'] = JSON.stringify($rootScope.latestLocation);
         $http.put(
-                $scope.$parent.serverRoot + 'updateLocation',
+                $rootScope.serverRoot + 'updateLocation',
             {
-                username: $scope.$parent.user.username,
-                latestLocation: $scope.$parent.latestLocation
+                username: $rootScope.user.username,
+                latestLocation: $rootScope.latestLocation
             }
         )
             .success(function(data, status, headers, config) {
@@ -1174,7 +1172,7 @@ app.controller('profileCtrl', function($scope, $state, $ionicHistory, $http, $ti
 
 });
 
-app.controller('chatCtrl', function($scope, $state, $stateParams, $timeout, $ionicScrollDelegate, $http) {
+app.controller('chatCtrl', function($scope, $rootScope, $state, $stateParams, $timeout, $ionicScrollDelegate, $http) {
     $scope.inputMessage;
     $scope.showTime = true;
 
@@ -1190,9 +1188,9 @@ app.controller('chatCtrl', function($scope, $state, $stateParams, $timeout, $ion
         var d = new Date();
         d = d.toLocaleTimeString().replace(/:\d+ /, ' ');
 
-        $scope.$parent.friends[$scope.$parent.curChatFriendUsername].messages.push({
-            from: $scope.$parent.user.username,
-            text: $scope.$parent.curChatFriendUsername,
+        $rootScope.friends[$rootScope.curChatFriendUsername].messages.push({
+            from: $rootScope.user.username,
+            text: $rootScope.curChatFriendUsername,
             content: $scope.inputMessage,
             time: d
         });
