@@ -418,7 +418,7 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
                 creater_username: $rootScope.user.username,
                 target_username: targetUsername,
                 status: status,
-                meetId: $rootScope.curMeet._id,
+                meetId: $rootScope.curMeet ? $rootScope.curMeet._id : null,
                 mapLoc: $rootScope.meetCondition.mapLoc,
                 specialInfo: $rootScope.meetCondition.specialInfo,
                 personLoc: window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null
@@ -610,13 +610,12 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
             $rootScope.showPopup('未能获取您的当前位置,请调整位置后重试');
             return;
         }
-
         $http.post(
                 $rootScope.serverRoot + 'searchTargets',
             {
                 username: $rootScope.user.username,
                 meetCondition: $rootScope.meetCondition,
-                meetId: $rootScope.curMeet._id,
+                meetId: $rootScope.curMeet ? $rootScope.curMeet._id : null,
                 searchMode: $rootScope.searchMode,
                 sendLoc: {
                     lng: $rootScope.latestLocation.lng,
@@ -849,6 +848,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ht
 
 
     $scope.createMeet = function(){
+        $rootScope.curMeet = null;
         $http.get($rootScope.serverRoot + "existInfo?username=" + $rootScope.user.username).
             success(function(data, status, headers, config) {
                 if (data.result == 'yes')
@@ -874,11 +874,27 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ht
                 }
                 else
                 {
-                    $rootScope.showPopup('请先完善特征信息!');
-                    $scope.enterInfo();
                 }
             }).
-            error($rootScope.ppError);
+            error(function(data, status, headers, config) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                if (status == 0)
+                {
+                    $rootScope.showPopup('网络不给力哦!'+ "(" + status + ")");
+                }
+                else
+                {
+                    if (data.result == '请先完善特征信息!')
+                    {
+                        $scope.enterInfo();
+                    }
+                    else
+                    {
+                        $rootScope.showPopup(data.result + "(" + status + ")");
+                    }
+                }
+            });
     }
 
     $scope.enterInfo = function(){
