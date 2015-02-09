@@ -247,7 +247,6 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
     }
 
     $rootScope.meetCondition = {
-        meetId: null,
         mapLoc: {
             uid: '',
             name: '',
@@ -419,7 +418,7 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
                 creater_username: $rootScope.user.username,
                 target_username: targetUsername,
                 status: status,
-                meetId: $rootScope.meetCondition.meetId,
+                meetId: $rootScope.curMeet._id,
                 mapLoc: $rootScope.meetCondition.mapLoc,
                 specialInfo: $rootScope.meetCondition.specialInfo,
                 personLoc: window.localStorage['latestLocation'] ? JSON.parse(window.localStorage['latestLocation']) : null
@@ -428,39 +427,48 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
             .success(function(data, status, headers, config) {
                 // this callback will be called asynchronously
                 // when the response is available
-                var newItem = data.result;
-
-                var logo = null;
-                if (newItem.creater.username == $scope.user.username)
+                if(data.ppNote == '互发')
                 {
-                    if (newItem.status == '待确认')
+                    $rootScope.friends.unshift(data.result);
+
+                    $rootScope.showPopup('恭喜你!互发成功,已加入好友列表,赶紧行动吧!');
+                }
+                else{
+
+                    var newItem = data.result;
+
+                    var logo = null;
+                    if (newItem.creater.username == $scope.user.username)
                     {
-                        logo = $rootScope.sysImagePath + "tbd.jpg";
+                        if (newItem.status == '待确认')
+                        {
+                            logo = $rootScope.sysImagePath + "tbd.jpg";
+                        }
+                        else
+                        {
+                            logo = $rootScope.imagePath + "normal/" + newItem.target.specialPic;
+                        }
                     }
                     else
                     {
-                        logo = $rootScope.imagePath + "normal/" + newItem.target.specialPic;
+                        logo = $rootScope.sysImagePath + "x.jpg";
                     }
-                }
-                else
-                {
-                    logo = $rootScope.sysImagePath + "x.jpg";
-                }
 
-                newItem.logo = logo;
+                    newItem.logo = logo;
 
-                var updateMeet = false;
-                for (var i = 0; i < $rootScope.meets.length; i++) {
-                    if ($rootScope.meets[i]._id === newItem._id)
+                    var updateMeet = false;
+                    for (var i = 0; i < $rootScope.meets.length; i++) {
+                        if ($rootScope.meets[i]._id === newItem._id)
+                        {
+                            $rootScope.meets[i] = newItem;
+                            updateMeet = true;
+                            break;
+                        }
+                    }
+                    if (!updateMeet)
                     {
-                        $rootScope.meets[i] = newItem;
-                        updateMeet = true;
-                        break;
+                        $rootScope.meets.unshift(newItem);
                     }
-                }
-                if (!updateMeet)
-                {
-                    $rootScope.meets.unshift(newItem);
                 }
                 $ionicHistory.nextViewOptions({
                     disableAnimate: true,
@@ -474,23 +482,25 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
     }
 
     $scope.yes = function(targetUsername){
-        if (targetUsername == 'fake')
+        if ($rootScope.searchMode == '回复')
         {
-            $rootScope.showPopup('请仔细选择图片!');
-            $ionicHistory.nextViewOptions({
-                disableAnimate: true,
-                disableBack: true,
-                historyRoot: true
-            });
-            $state.go('tab.meet');
-            $scope.modal.hide();
-        }
-        else
-        {
-            if ($rootScope.searchMode == '回复')
+            if (targetUsername == 'fake')
             {
-                if ($rootScope.curMeet.creater.username == targetUsername)
-                {
+                $http.put(
+                        $rootScope.serverRoot + 'replyReduce',
+                    {
+                        meetId: $rootScope.curMeet._id
+                    }
+                )
+                    .success(function(data, status, headers, config){
+                        // this callback will be called asynchronously
+                        // when the response is available
+                        $rootScope.showPopup('请仔细选择图片!, 还剩回复次数:' + data.result);
+                    }).
+                    error($rootScope.ppError);
+            }
+            else {
+                if ($rootScope.curMeet.creater.username == targetUsername) {
                     $http.post(
                             $rootScope.serverRoot + 'replySuccess',
                         {
@@ -499,14 +509,13 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
                             meetId: $rootScope.curMeet._id
                         }
                     )
-                        .success(function(data, status, headers, config) {
+                        .success(function(data, status, headers, config){
                             // this callback will be called asynchronously
                             // when the response is available
                             $rootScope.friends.unshift(data.result);
                             //移除成功的meet
                             for (var i = 0; i < $rootScope.meets.length; i++) {
-                                if ($rootScope.meets[i]._id === data.meetId)
-                                {
+                                if ($rootScope.meets[i]._id === data.meetId) {
                                     $rootScope.meets.splice(i, 1);
                                     break;
                                 }
@@ -516,10 +525,36 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
                         error($rootScope.ppError);
 
                 }
-                else
-                {
-                    $rootScope.showPopup('没猜对哦!');
+                else {
+                    $http.put(
+                            $rootScope.serverRoot + 'replyReduce',
+                        {
+                            meetId: $rootScope.curMeet._id
+                        }
+                    )
+                        .success(function(data, status, headers, config){
+                            // this callback will be called asynchronously
+                            // when the response is available
+                            $rootScope.showPopup('没猜对哦!, 还剩回复次数:' + data.result);
+                        }).
+                        error($rootScope.ppError);
                 }
+            }
+            $ionicHistory.nextViewOptions({
+                disableAnimate: true,
+                disableBack: true,
+                historyRoot: true
+            });
+            $state.go('tab.meet');
+            $scope.modal.hide();
+
+        }
+        //searchMode == '新建' || '确认'
+        else
+        {
+            if (targetUsername == 'fake')
+            {
+                $rootScope.showPopup('请仔细选择图片!');
                 $ionicHistory.nextViewOptions({
                     disableAnimate: true,
                     disableBack: true,
@@ -527,9 +562,7 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
                 });
                 $state.go('tab.meet');
                 $scope.modal.hide();
-
             }
-            //searchMode = '回复' || '确认'
             else
             {
                 $scope.uploadMeet('待回复');
@@ -583,6 +616,8 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
             {
                 username: $rootScope.user.username,
                 meetCondition: $rootScope.meetCondition,
+                meetId: $rootScope.curMeet._id,
+                searchMode: $rootScope.searchMode,
                 sendLoc: {
                     lng: $rootScope.latestLocation.lng,
                     lat: $rootScope.latestLocation.lat
@@ -877,7 +912,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ht
         if (meet.status=='待确认')
         {
             ppCopyObj(meet, $rootScope.meetCondition);
-            $rootScope.meetCondition.meetId = meet._id;
+            $rootScope.curMeet = meet;
             $rootScope.searchMode = '确认';
 
             $state.go('tab.meet.condition');
@@ -1090,6 +1125,7 @@ app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory
 
     $scope.getCurMapPosition = function()
     {
+        console.log($rootScope.latestLocation);
         $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.latestLocation.lng + "," + $rootScope.latestLocation.lat).
             success(function(data, status, headers, config) {
                 //转换为百度坐标
@@ -1138,7 +1174,7 @@ app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory
 
 //        $rootScope.latestLocation.lng = position.coords.longitude;
 //        $rootScope.latestLocation.lat = position.coords.latitude;
-
+        console.log($rootScope.latestLocation);
         $rootScope.latestLocation = {
             lng: position.coords.longitude,
             lat: position.coords.latitude
