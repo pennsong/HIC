@@ -676,7 +676,7 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
         data += "&location=" + $scope.bLat + "," + $scope.bLng;
         data += "&filter=sort_name:distance";
 
-        $http.get("http://api.map.baidu.com/place/v2/search?" + data).
+        $http.jsonp("http://api.map.baidu.com/place/v2/search?callback=JSON_CALLBACK&" + data).
             success(function(data, status, headers, config) {
                 //查询结果
                 $rootScope.curOptions = data.results;
@@ -698,7 +698,7 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
                 $rootScope.showPopup('未能获取您的当前位置,请调整位置后重试');
                 return;
             }
-            $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.latestLocation.lng + "," + $rootScope.latestLocation.lat).
+            $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.latestLocation.lng + "," + $rootScope.latestLocation.lat).
                 success(function(data, status, headers, config) {
                     //转换为百度坐标
                     $scope.bLng = data.result[0].x;
@@ -1145,8 +1145,8 @@ app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory
 
     $scope.getCurMapPosition = function()
     {
-        console.log($rootScope.latestLocation);
-        $http.get("http://api.map.baidu.com/geoconv/v1/?ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.latestLocation.lng + "," + $rootScope.latestLocation.lat).
+        //console.log($rootScope.latestLocation);
+        $http.jsonp("http://api.map.baidu.com/geoconv/v1/?callback=JSON_CALLBACK&ak=MgBALVVeCd8THVBi6gPdvsvG&coords=" + $rootScope.latestLocation.lng + "," + $rootScope.latestLocation.lat).
             success(function(data, status, headers, config) {
                 //转换为百度坐标
                 $scope.bLng = data.result[0].x;
