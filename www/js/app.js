@@ -168,6 +168,10 @@ app.directive('input', function($timeout){
 });
 
 app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $rootScope){
+    $rootScope.socket = io.connect('http://192.168.1.6:3000');
+    $rootScope.socket.emit('ready', {username: 'ppt2'});
+
+
     $rootScope.user = {
         username: window.localStorage['username'] || '',
         password: ''
