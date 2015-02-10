@@ -168,9 +168,9 @@ app.directive('input', function($timeout){
 });
 
 app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $rootScope){
-    $rootScope.socket = io.connect('http://192.168.1.6:3000');
-    $rootScope.socket.emit('ready', {username: 'ppt2'});
+    $rootScope.online = "否";
 
+    $rootScope.infoNeedUpdateTime = 0;
 
     $rootScope.user = {
         username: window.localStorage['username'] || '',
@@ -357,6 +357,25 @@ app.controller('loginCtrl', function($scope, $rootScope, $state, $http, $ionicPo
                 $rootScope.user.username = data.result;
                 window.localStorage['username'] = data.result;
                 $state.go("tab.meet")
+                $rootScope.socket = io.connect($rootScope.serverRoot, {
+//                    'reconnect': true,
+//                    'reconnectionDelay': 1000,
+//                    'reconnectionDelayMax': 5000
+                });
+                $rootScope.socket.on('connect', function() {
+                    $rootScope.online = '是';
+                    $rootScope.socket.emit('online', {username: window.localStorage['username']});
+                    console.log("con");
+                });
+                $rootScope.socket.on('disconnect', function() {
+                    $rootScope.online = '否';
+                    console.log("dis");
+                });
+                $rootScope.socket.on('infoNeedUpdate', function() {
+                    $rootScope.infoNeedUpdateTime++;
+                    $scope.$apply();
+                    console.log($rootScope.infoNeedUpdateTime);
+                });
             }).
             error($rootScope.ppError);
     }
@@ -902,6 +921,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ht
     }
 
     $scope.enterInfo = function(){
+        $rootScope.infoNeedUpdateTime = 0;
         $http.get($rootScope.serverRoot + "getInfo?username=" + $rootScope.user.username).
             success(function(data, status, headers, config) {
                 $rootScope.myInfo = data.result;

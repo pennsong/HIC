@@ -3,7 +3,7 @@
         <a class="button button-icon icon ion-plus-round" ng-click="createMeet()">
         </a>
     </ion-nav-buttons>
-    <ion-nav-buttons side="secondary">
+    <ion-nav-buttons side="secondary"><span class="badge badge-assertive" ng-show="infoNeedUpdateTime > 0">{{infoNeedUpdateTime}}</span>
         <a class="button button-icon icon ion-ios-body" ng-click="enterInfo()">
         </a>
     </ion-nav-buttons>
