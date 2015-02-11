@@ -231,6 +231,32 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
             $scope.$apply();
             console.log("meetInvite");
         });
+        $rootScope.socket.on('meetSuccess', function(data) {
+            var tmpFriend = data.result;
+            console.log(tmpFriend);
+            var tmpCreater = tmpFriend.creater;
+            var tmpTarget = tmpFriend.target;
+            //移除对应meet
+            for (var i = 0; i < $rootScope.meets.length; i++) {
+                if ($rootScope.meets[i].status == '待回复')
+                {
+                    if (
+                        ($rootScope.meets[i].creater.username == tmpCreater.username
+                        && $rootScope.meets[i].target.username == tmpTarget.username)
+                        ||
+                        ($rootScope.meets[i].creater.username == tmpTarget.username
+                            && $rootScope.meets[i].target.username == tmpCreater.username)
+                        )
+                    {
+                        $rootScope.meets.splice(i, 1);
+                    }
+                }
+            }
+            //添加朋友
+            $scope.friends.unshift(tmpFriend);
+            $scope.$apply();
+            console.log("meetSuccess");
+        });
 
     }
 
@@ -479,8 +505,6 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
                 // when the response is available
                 if(data.ppNote == '互发')
                 {
-                    $rootScope.friends.unshift(data.result);
-
                     $rootScope.showPopup('恭喜你!互发成功,已加入好友列表,赶紧行动吧!');
                 }
                 else{
@@ -574,14 +598,6 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
                         .success(function(data, status, headers, config){
                             // this callback will be called asynchronously
                             // when the response is available
-                            $rootScope.friends.unshift(data.result);
-                            //移除成功的meet
-                            for (var i = 0; i < $rootScope.meets.length; i++) {
-                                if ($rootScope.meets[i]._id === data.meetId) {
-                                    $rootScope.meets.splice(i, 1);
-                                    break;
-                                }
-                            }
                             $rootScope.showPopup('恭喜你!已加入好友列表,赶紧行动吧!');
                         }).
                         error($rootScope.ppError);
