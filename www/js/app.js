@@ -606,6 +606,10 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
         //searchMode == '新建' || '确认'
         else
         {
+            if ($rootScope.searchMode == '确认')
+            {
+                delete $rootScope.meetTargetUpdated[$rootScope.curMeet._id];
+            }
             if (targetUsername == 'fake')
             {
                 $http.put(
@@ -638,6 +642,10 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
     $scope.no = function(){
         if ($rootScope.searchMode == '回复' || $rootScope.searchMode == '确认')
         {
+            if ($rootScope.searchMode == '确认')
+            {
+                delete $rootScope.meetTargetUpdated[$rootScope.curMeet._id];
+            }
             $ionicHistory.nextViewOptions({
                 disableAnimate: true,
                 disableBack: true,
