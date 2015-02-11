@@ -529,15 +529,27 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
             if (targetUsername == 'fake')
             {
                 $http.put(
-                        $rootScope.serverRoot + 'replyReduce',
+                        $rootScope.serverRoot + 'fakeSelect',
                     {
-                        meetId: $rootScope.curMeet._id
+                        username: $rootScope.user.username
                     }
                 )
                     .success(function(data, status, headers, config){
                         // this callback will be called asynchronously
                         // when the response is available
-                        $rootScope.showPopup('请仔细选择图片!, 还剩回复次数:' + data.result);
+                        $http.put(
+                                $rootScope.serverRoot + 'replyReduce',
+                            {
+                                username: $rootScope.user.username,
+                                meetId: $rootScope.curMeet._id
+                            }
+                        )
+                            .success(function(data, status, headers, config){
+                                // this callback will be called asynchronously
+                                // when the response is available
+                                $rootScope.showPopup('请仔细选择图片!, 还剩回复次数:' + data.result);
+                            }).
+                            error($rootScope.ppError);
                     }).
                     error($rootScope.ppError);
             }
@@ -596,14 +608,25 @@ app.controller('conditionSpecialCtrl', function($scope, $rootScope, $state, $ion
         {
             if (targetUsername == 'fake')
             {
-                $rootScope.showPopup('请仔细选择图片!');
-                $ionicHistory.nextViewOptions({
-                    disableAnimate: true,
-                    disableBack: true,
-                    historyRoot: true
-                });
-                $state.go('tab.meet');
-                $scope.modal.hide();
+                $http.put(
+                        $rootScope.serverRoot + 'fakeSelect',
+                    {
+                        username: $rootScope.user.username
+                    }
+                )
+                    .success(function(data, status, headers, config){
+                        // this callback will be called asynchronously
+                        // when the response is available
+                        $rootScope.showPopup('请仔细选择图片!');
+                        $ionicHistory.nextViewOptions({
+                            disableAnimate: true,
+                            disableBack: true,
+                            historyRoot: true
+                        });
+                        $state.go('tab.meet');
+                        $scope.modal.hide();
+                    }).
+                    error($rootScope.ppError);
             }
             else
             {
