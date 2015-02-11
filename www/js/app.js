@@ -192,6 +192,40 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
 
     $rootScope.curMeet = null;
 
+    $rootScope.initSocket = function(){
+        $rootScope.socket = io.connect($rootScope.serverRoot, {
+//                    'reconnect': true,
+//                    'reconnectionDelay': 1000,
+//                    'reconnectionDelayMax': 5000
+        });
+        $rootScope.socket.on('connect', function() {
+            $rootScope.online = '是';
+            $rootScope.socket.emit('online', {username: window.localStorage['username']});
+            console.log("con");
+        });
+        $rootScope.socket.on('disconnect', function() {
+            $rootScope.online = '否';
+            console.log("dis");
+        });
+        $rootScope.socket.on('infoNeedUpdate', function() {
+            $rootScope.infoNeedUpdateTime++;
+            $scope.$apply();
+            console.log($rootScope.infoNeedUpdateTime);
+        });
+        $rootScope.socket.on('targetUpdated', function(data) {
+            if ($rootScope.meetTargetUpdated[data.meetId])
+            {
+                $rootScope.meetTargetUpdated[data.meetId]++;
+            }
+            else
+            {
+                $rootScope.meetTargetUpdated[data.meetId] = 1;
+            }
+            console.log($rootScope.meetTargetUpdated[data.meetId]);
+            $scope.$apply();
+        });
+    }
+
     $rootScope.showPopup = function(msg) {
         var alertPopup = $ionicPopup.alert({
             title: '注意',
@@ -267,6 +301,8 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
     };
 
     $rootScope.meets = [];
+
+    $rootScope.meetTargetUpdated = {};
 
     $rootScope.friends = [];
 
@@ -356,26 +392,8 @@ app.controller('loginCtrl', function($scope, $rootScope, $state, $http, $ionicPo
                 // when the response is available
                 $rootScope.user.username = data.result;
                 window.localStorage['username'] = data.result;
-                $state.go("tab.meet")
-                $rootScope.socket = io.connect($rootScope.serverRoot, {
-//                    'reconnect': true,
-//                    'reconnectionDelay': 1000,
-//                    'reconnectionDelayMax': 5000
-                });
-                $rootScope.socket.on('connect', function() {
-                    $rootScope.online = '是';
-                    $rootScope.socket.emit('online', {username: window.localStorage['username']});
-                    console.log("con");
-                });
-                $rootScope.socket.on('disconnect', function() {
-                    $rootScope.online = '否';
-                    console.log("dis");
-                });
-                $rootScope.socket.on('infoNeedUpdate', function() {
-                    $rootScope.infoNeedUpdateTime++;
-                    $scope.$apply();
-                    console.log($rootScope.infoNeedUpdateTime);
-                });
+                $state.go("tab.meet");
+                $rootScope.initSocket();
             }).
             error($rootScope.ppError);
     }
@@ -400,7 +418,8 @@ app.controller('registerCtrl', function($scope, $rootScope, $state, $http, $ioni
                 // when the response is available
                 $rootScope.user.username = data.result;
                 window.localStorage['username'] = data.result;
-                $state.go("tab.meet")
+                $state.go("tab.meet");
+                $rootScope.initSocket();
             }).
             error($rootScope.ppError);
     }
@@ -921,7 +940,6 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ht
     }
 
     $scope.enterInfo = function(){
-        $rootScope.infoNeedUpdateTime = 0;
         $http.get($rootScope.serverRoot + "getInfo?username=" + $rootScope.user.username).
             success(function(data, status, headers, config) {
                 $rootScope.myInfo = data.result;
@@ -1039,6 +1057,7 @@ app.controller('meetInfoCtrl', function($scope, $rootScope, $state, $ionicModal,
             .success(function(data, status, headers, config) {
                 // this callback will be called asynchronously
                 // when the response is available
+                $rootScope.infoNeedUpdateTime = 0;
                 $state.go('tab.meet');
             }).
             error($rootScope.ppError);
@@ -1129,7 +1148,7 @@ app.controller('meetInfoCtrl', function($scope, $rootScope, $state, $ionicModal,
 
                 $cordovaFile.uploadFile($rootScope.serverRoot + 'uploadSpecialPic', fileURL, options).then(function(result) {
                     $rootScope.myInfo.specialPic = (JSON.parse(result.response))["result"];
-                    //$scope.showPopup("SUCCESS: " + result.response);
+                    //$scope.showPopup("SUCCESS: " + (JSON.parse(result.response))["result"]);
                 }, function(err) {
                     $scope.showPopup("ERROR: " + JSON.stringify(err));
                 }, function (progress) {

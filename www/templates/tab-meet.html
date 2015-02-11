@@ -12,7 +12,7 @@
         </ion-refresher>
         <div class="list">
             <a class="item item-thumbnail-left" href="#" ng-repeat="item in meets" ng-click="clickMeet(item)">
-                <img ng-src="{{item.logo}}">
+                <img ng-src="{{item.logo}}"><span class="badge badge-assertive" ng-show="meetTargetUpdated[item._id]">{{meetTargetUpdated[item._id]}}</span>
                 <h2>{{item.mapLoc.name}}</h2>
                 <p>{{item.mapLoc.address}}</p>
                 <p>{{item.status}}</p>
