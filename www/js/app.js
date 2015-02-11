@@ -224,6 +224,14 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
             console.log($rootScope.meetTargetUpdated[data.meetId]);
             $scope.$apply();
         });
+        $rootScope.socket.on('meetInvite', function(data) {
+            console.log(data.meet);
+            data.meet.logo = $rootScope.serverRoot + "images/system/x.jpg";
+            $scope.meets.unshift(data.meet);
+            $scope.$apply();
+            console.log("meetInvite");
+        });
+
     }
 
     $rootScope.showPopup = function(msg) {
