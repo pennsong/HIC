@@ -290,8 +290,8 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
 
     $rootScope.searchMode;
 
-    $rootScope.serverRoot = "http://192.168.1.6:3000/";
-    //$rootScope.serverRoot = "http://10.0.1.5:3000/";
+    //$rootScope.serverRoot = "http://192.168.1.6:3000/";
+    $rootScope.serverRoot = "http://10.0.1.21:3000/";
     $rootScope.imagePath = $rootScope.serverRoot + 'images/';
     $rootScope.sysImagePath = $rootScope.serverRoot + 'images/system/';
 
