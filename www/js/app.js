@@ -168,6 +168,37 @@ app.directive('input', function($timeout){
 });
 
 app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $rootScope){
+    function onSuccess(position) {
+        $rootScope.latestLocation = {
+            lng: position.coords.longitude,
+            lat: position.coords.latitude
+        }
+        window.localStorage['latestLocation'] = JSON.stringify($rootScope.latestLocation);
+        if ($rootScope.online == '是')
+        {
+            $http.put(
+                    $rootScope.serverRoot + 'updateLocation',
+                {
+                    username: $rootScope.user.username,
+                    latestLocation: $rootScope.latestLocation
+                }
+            )
+                .success(function(data, status, headers, config) {
+                    // this callback will be called asynchronously
+                    //console.log('update location succeed');
+                });
+        }
+    }
+
+    function onError(error) {
+        var d = new Date();
+        d = d.toLocaleTimeString().replace(/:\d+ /, ' ');
+        window.localStorage['locationValErr'] = (d + 'code: '    + error.code    + '\n' +
+            'message: ' + error.message + '\n');
+    }
+
+    var watchID = navigator.geolocation.watchPosition(onSuccess, onError, { maximumAge: 3000, timeout: 3000, enableHighAccuracy: true });
+
     $rootScope.online = "否";
 
     $rootScope.infoNeedUpdateTime = 0;
@@ -242,7 +273,7 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
                 {
                     if (
                         ($rootScope.meets[i].creater.username == tmpCreater.username
-                        && $rootScope.meets[i].target.username == tmpTarget.username)
+                            && $rootScope.meets[i].target.username == tmpTarget.username)
                         ||
                         ($rootScope.meets[i].creater.username == tmpTarget.username
                             && $rootScope.meets[i].target.username == tmpCreater.username)
@@ -290,8 +321,8 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
 
     $rootScope.searchMode;
 
-    //$rootScope.serverRoot = "http://192.168.1.6:3000/";
-    $rootScope.serverRoot = "http://10.0.1.21:3000/";
+    $rootScope.serverRoot = "http://192.168.1.6:3000/";
+    //$rootScope.serverRoot = "http://10.0.1.21:3000/";
     $rootScope.imagePath = $rootScope.serverRoot + 'images/';
     $rootScope.sysImagePath = $rootScope.serverRoot + 'images/system/';
 
@@ -707,26 +738,52 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
             $rootScope.showPopup('未能获取您的当前位置,请调整位置后重试');
             return;
         }
-        $http.post(
-                $rootScope.serverRoot + 'searchTargets',
-            {
-                username: $rootScope.user.username,
-                meetCondition: $rootScope.meetCondition,
-                meetId: $rootScope.curMeet ? $rootScope.curMeet._id : null,
-                searchMode: $rootScope.searchMode,
-                sendLoc: {
-                    lng: $rootScope.latestLocation.lng,
-                    lat: $rootScope.latestLocation.lat
+        if ($rootScope.searchMode == '回复')
+        {
+            $http.post(
+                    $rootScope.serverRoot + 'replySearchTargets',
+                {
+                    username: $rootScope.user.username,
+                    meetCondition: $rootScope.meetCondition,
+                    meetCreaterUsername: $rootScope.curMeet ? $rootScope.curMeet.creater.username : null,
+                    meetId: $rootScope.curMeet ? $rootScope.curMeet._id : null,
+                    sendLoc: {
+                        lng: $rootScope.latestLocation.lng,
+                        lat: $rootScope.latestLocation.lat
+                    }
                 }
-            }
-        )
-            .success(function(data, status, headers, config) {
-                // this callback will be called asynchronously
-                // when the response is available
-                $rootScope.targets = data.result;
-                $state.go('tab.meet.condition.specialPic');
-            }).
-            error($rootScope.ppError);
+            )
+                .success(function(data, status, headers, config) {
+                    // this callback will be called asynchronously
+                    // when the response is available
+                    $rootScope.targets = data.result;
+                    $state.go('tab.meet.condition.specialPic');
+                }).
+                error($rootScope.ppError);
+        }
+        else
+        {
+            $http.post(
+                    $rootScope.serverRoot + 'searchTargets',
+                {
+                    username: $rootScope.user.username,
+                    meetCondition: $rootScope.meetCondition,
+                    meetId: $rootScope.curMeet ? $rootScope.curMeet._id : null,
+                    searchMode: $rootScope.searchMode,
+                    sendLoc: {
+                        lng: $rootScope.latestLocation.lng,
+                        lat: $rootScope.latestLocation.lat
+                    }
+                }
+            )
+                .success(function(data, status, headers, config) {
+                    // this callback will be called asynchronously
+                    // when the response is available
+                    $rootScope.targets = data.result;
+                    $state.go('tab.meet.condition.specialPic');
+                }).
+                error($rootScope.ppError);
+        }
     }
 
     $ionicModal.fromTemplateUrl(
@@ -785,6 +842,10 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
         }
         if (item == '地点')
         {
+            if ($rootScope.searchMode == '回复')
+            {
+                return;
+            }
             $rootScope.curOptions = [];
             if (!($rootScope.latestLocation.lng && $rootScope.latestLocation.lat))
             {
@@ -984,6 +1045,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ht
                 {
                     if (data.result == '请先完善特征信息!')
                     {
+                        $rootScope.showPopup(data.result + "(" + status + ")");
                         $scope.enterInfo();
                     }
                     else
@@ -1028,7 +1090,14 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ht
             $rootScope.curMeet = meet;
             $rootScope.searchMode = '确认';
 
-            $state.go('tab.meet.condition');
+            if ($rootScope.meetTargetUpdated[meet._id])
+            {
+                $state.go('tab.meet.condition.specialPic');
+            }
+            else
+            {
+                $state.go('tab.meet.condition');
+            }
         }
         else if (meet.status == '待回复')
         {
@@ -1036,11 +1105,7 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ht
             {
                 $rootScope.searchMode = '回复';
                 $rootScope.meetCondition = {
-                    mapLoc: {
-                        uid: '',
-                        name: '',
-                        address: ''
-                    },
+                    mapLoc: meet.mapLoc,
                     specialInfo: {
                         sex : '',
                         clothesColor : '',
@@ -1272,54 +1337,6 @@ app.controller('profileCtrl', function($scope, $rootScope, $state, $ionicHistory
         }, 300);
 
     }
-
-    $scope.his = function(){
-        //console.log($ionicHistory.viewHistory());
-        var d = new Date();
-        d = d.toLocaleTimeString().replace(/:\d+ /, ' ');
-        $scope.mapLocs.unshift(d + ',test');
-    }
-
-    // onSuccess Callback
-//   This method accepts a `Position` object, which contains
-//   the current GPS coordinates
-//
-    function onSuccess(position) {
-
-//        $rootScope.latestLocation.lng = position.coords.longitude;
-//        $rootScope.latestLocation.lat = position.coords.latitude;
-        console.log($rootScope.latestLocation);
-        $rootScope.latestLocation = {
-            lng: position.coords.longitude,
-            lat: position.coords.latitude
-        }
-        window.localStorage['latestLocation'] = JSON.stringify($rootScope.latestLocation);
-        $http.put(
-                $rootScope.serverRoot + 'updateLocation',
-            {
-                username: $rootScope.user.username,
-                latestLocation: $rootScope.latestLocation
-            }
-        )
-            .success(function(data, status, headers, config) {
-                // this callback will be called asynchronously
-                console.log('update location succeed');
-            });
-    }
-
-// onError Callback receives a PositionError object
-//
-    function onError(error) {
-        var d = new Date();
-        d = d.toLocaleTimeString().replace(/:\d+ /, ' ');
-        window.localStorage['locationValErr'] = (d + 'code: '    + error.code    + '\n' +
-            'message: ' + error.message + '\n');
-    }
-
-// Options: throw an error if no update is received every 30 seconds.
-//
-    var watchID = navigator.geolocation.watchPosition(onSuccess, onError, { maximumAge: 3000, timeout: 3000, enableHighAccuracy: true });
-
 });
 
 app.controller('chatCtrl', function($scope, $rootScope, $state, $stateParams, $timeout, $ionicScrollDelegate, $http) {
