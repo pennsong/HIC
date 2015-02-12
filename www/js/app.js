@@ -697,7 +697,7 @@ app.controller('meetConditionCtrl', function($scope, $rootScope, $state, $ionicM
             && $rootScope.meetCondition.specialInfo.clothesType
             && $rootScope.meetCondition.specialInfo.glasses
             && $rootScope.meetCondition.specialInfo.hair
-            && $rootScope.meetCondition.mapLoc
+            && $rootScope.meetCondition.mapLoc.uid
             )){
             $rootScope.showPopup('请把条件填写完整!');
             return;
