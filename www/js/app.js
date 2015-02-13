@@ -167,7 +167,7 @@ app.directive('input', function($timeout){
     }
 });
 
-app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $rootScope){
+app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $http){
     function onSuccess(position) {
         $rootScope.latestLocation = {
             lng: position.coords.longitude,
@@ -321,8 +321,8 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
 
     $rootScope.searchMode;
 
-    $rootScope.serverRoot = "http://192.168.1.6:3000/";
-    //$rootScope.serverRoot = "http://10.0.1.21:3000/";
+    //$rootScope.serverRoot = "http://192.168.1.6:3000/";
+    $rootScope.serverRoot = "http://10.0.1.21:3000/";
     $rootScope.imagePath = $rootScope.serverRoot + 'images/';
     $rootScope.sysImagePath = $rootScope.serverRoot + 'images/system/';
 
@@ -396,8 +396,8 @@ app.controller('baseCtrl', function($scope, $rootScope, $state, $ionicPopup, $ro
     ];
 
     $rootScope.clothesType = [
-        "风衣/大衣",
-        "西装/夹克/套装",
+        "风衣/大衣/夹克",
+        "西装/套装",
         "运动外套/卫衣",
         "T恤长袖",
         "T恤短袖",
@@ -1092,7 +1092,26 @@ app.controller('meetCtrl', function($scope, $rootScope, $state, $ionicModal, $ht
 
             if ($rootScope.meetTargetUpdated[meet._id])
             {
-                $state.go('tab.meet.condition.specialPic');
+                $http.post(
+                        $rootScope.serverRoot + 'searchTargets',
+                    {
+                        username: $rootScope.user.username,
+                        meetCondition: $rootScope.meetCondition,
+                        meetId: $rootScope.curMeet ? $rootScope.curMeet._id : null,
+                        searchMode: $rootScope.searchMode,
+                        sendLoc: {
+                            lng: $rootScope.latestLocation.lng,
+                            lat: $rootScope.latestLocation.lat
+                        }
+                    }
+                )
+                    .success(function(data, status, headers, config) {
+                        // this callback will be called asynchronously
+                        // when the response is available
+                        $rootScope.targets = data.result;
+                        $state.go('tab.meet.condition.specialPic');
+                    }).
+                    error($rootScope.ppError);
             }
             else
             {
